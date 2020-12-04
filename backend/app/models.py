@@ -1,6 +1,16 @@
 """Data models."""
 from . import db
 
+
+class ActorsInMovies(db.Model):
+    __tablename__ = "ActorsInMovies"
+
+    id = db.Column(db.Integer, primary_key=True)
+    actor_id = db.Column(db.Integer, db.ForeignKey("Movie.id"))
+    movie_id = db.Column(db.Integer, db.ForeignKey(
+        "Actor.id"))
+
+
 """
 Actor
 
@@ -8,19 +18,21 @@ Actor
 
 
 class Actor(db.Model):
-    __tablename__ = "Actors"
+    __tablename__ = "Actor"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    first_name = db.Column(db.String)
+    last_name = db.Column(db.String)
     age = db.Column(db.Integer)
     gender = db.Column(db.String)
     image_link = db.Column(db.String)
     seeking_role = db.Column(db.Boolean)
     movies = db.relationship(
-        "Movie", cascade="all,delete", secondary="actors_in_movies")
+        "Movie",  back_populates="actors",  secondary=lambda: ActorsInMovies.__table__)
 
-    def __init__(self, name, age, gender, image_link, seeking_role, movies):
-        self.name = name
+    def __init__(self, first_name, last_name, age, gender, image_link, seeking_role, movies):
+        self.first_name = first_name
+        self.last_name = last_name
         self.age = age
         self.gender = gender
         self.image_link = image_link
@@ -57,7 +69,7 @@ Movie
 
 
 class Movie(db.Model):
-    __tablename__ = "Movies"
+    __tablename__ = "Movie"
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
@@ -66,7 +78,7 @@ class Movie(db.Model):
     poster = db.Column(db.String)
     seeking_talent = db.Column(db.Boolean)
     actors = db.relationship(
-        "Actor", cascade="all,delete",  secondary="actors_in_movies")
+        "Actor", back_populates="movies",  secondary=lambda: ActorsInMovies.__table__)
 
     def __init__(self, title, genre, release_date, poster, seeking_talent, actors):
         self.title = title
@@ -97,28 +109,3 @@ class Movie(db.Model):
             "seeking_talent": self.seeking_talent,
             "actors": self.actors
         }
-
-
-class ActorsInMovies(db.Model):
-    __tablename__ = "actors_in_movies"
-
-    id = db.Column(db.Integer, primary_key=True)
-    actor_id = db.Column(db.Integer, db.ForeignKey(
-        "Actors.id"))
-    movie_id = db.Column(db.Integer, db.ForeignKey(
-        "Movies.id"))
-
-    def __init__(self, actor_id, movie_id):
-        self.actor_id = actor_id
-        self.movie_id = movie_id
-
-    def insert(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
