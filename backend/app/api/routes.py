@@ -33,7 +33,8 @@ def get_actors():
         for actor in all_actors:
             actor = {
                 "id": actor.id,
-                "name": actor.name,
+                "first_name": actor.first_name,
+                "last_name": actor.last_name,
                 "age": actor.age,
                 "gender": actor.gender,
                 "image_link": actor.image_link,
@@ -69,7 +70,8 @@ def get_actor_by_id(actor_id):
 
         data = {
             "id": actor.id,
-            "name": actor.name,
+            "first_name": actor.first_name,
+            "last_name": actor.last_name,
             "age": actor.age,
             "gender": actor.gender,
             "image_link": actor.image_link,
@@ -80,7 +82,7 @@ def get_actor_by_id(actor_id):
         return jsonify({"success": True, "actor": data})
 
     except:
-        abort(422)
+        abort(404)
 
 
 @api.route("/actors", methods=["POST"])
@@ -88,7 +90,8 @@ def add_actor():
     body = request.get_json()
 
     try:
-        name = body.get("name", None)
+        first_name = body.get("first_name", None)
+        last_name = body.get("last_name", None)
         age = body.get("age", None)
         gender = body.get("gender", None)
         image_link = body.get("image_link", None)
@@ -98,7 +101,8 @@ def add_actor():
         actor_movies = Movie.query.filter(Movie.id.in_(movie_ids)).all()
 
         actor = Actor(
-            name=name,
+            first_name=first_name,
+            last_name=last_name,
             age=age,
             gender=gender,
             image_link=image_link,
@@ -114,6 +118,47 @@ def add_actor():
         abort(422)
 
 
+@api.route("/actors/<int:actor_id>", methods=["PATCH"])
+def edit_actor(actor_id):
+    body = request.get_json()
+    try:
+        actor = Actor.query.get(actor_id)
+    except:
+        abort(404)
+    try:
+        actor.first_name = body.get("first_name", None)
+        actor.last_name = body.get("last_name", None)
+        actor.age = body.get("age", None)
+        actor.gender = body.get("gender", None)
+        actor.image_link = body.get("image_link", None)
+        actor.seeking_role = body.get("seeking_role", None)
+
+        movie_ids = body.get("movies")['movie_ids']
+        actor_movies = Movie.query.filter(Movie.id.in_(movie_ids)).all()
+        actor.movies = actor_movies
+
+        actor.update()
+        return jsonify({"success": True, "updated_actor": actor.id})
+    except:
+        abort(422)
+
+
+@api.route("/actors/<int:actor_id>", methods=["DELETE"])
+def delete_actor(actor_id):
+
+    try:
+        actor = Actor.query.get(actor_id)
+    except:
+        abort(404)
+
+    try:
+        actor.delete()
+        return jsonify({"success": True})
+
+    except:
+        abort(500)
+
+
 @api.route("/movies", methods=["GET"])
 def get_movies():
 
@@ -122,6 +167,15 @@ def get_movies():
 
     try:
         for movie in all_movies:
+            actors_data = []
+            for actor in movie.actors:
+                actor = {
+                    "id": actor.id,
+                    "first_name": actor.first_name,
+                    "last_name": actor.last_name,
+                }
+                actors_data.append(actor)
+
             movie = {
                 "id": movie.id,
                 "title": movie.title,
@@ -129,6 +183,7 @@ def get_movies():
                 "release_date": movie.release_date,
                 "poster": movie.poster,
                 "seeking_talent": movie.seeking_talent,
+                "actors": actors_data
             }
             data.append(movie)
 
@@ -153,7 +208,8 @@ def get_movie_by_id(movie_id):
         for actor in movie.actors:
             actor = {
                 "id": actor.id,
-                "name": actor.name,
+                "first_name": actor.first_name,
+                "last_name": actor.last_name,
                 "age": actor.age,
                 "gender": actor.gender,
                 "image_link": actor.image_link,
@@ -174,7 +230,7 @@ def get_movie_by_id(movie_id):
         return jsonify({"success": True, "movie": data})
 
     except:
-        abort(422)
+        abort(404)
 
 
 @api.route("/movies", methods=["POST"])
@@ -212,7 +268,7 @@ def edit_movie(movie_id):
         movie = Movie.query.get(movie_id)
     except:
         abort(404)
-    try:  # TODO: handle partial updates
+    try:
         movie.title = body.get("title")
         movie.genre = body.get("genre")
         movie.release_date = body.get("release_date")
@@ -237,10 +293,11 @@ def delete_movie(movie_id):
     except:
         abort(404)
 
-    movie.delete()
-    return jsonify({"success": True})
-
-    # abort(422)
+    try:
+        movie.delete()
+        return jsonify({"success": True})
+    except:
+        abort(500)
 
 
 """Error handlers."""
