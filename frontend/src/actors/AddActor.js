@@ -1,4 +1,4 @@
-import {React, useState} from "react";
+import {React, useState, useEffect} from "react";
 import {
   Box,
   Container,
@@ -8,86 +8,56 @@ import {
   Button,
   Radio,
   RadioGroup,
-  Select,
   useToast,
   FormControl,
   FormLabel,
   FormErrorMessage,
   Input,
-  IconButton,
-  HStack,
+  Center,
 } from "@chakra-ui/react";
-import {CloseIcon} from "@chakra-ui/icons";
-import {MovieSelect} from "../ui/MovieSelect";
 
 import {Formik, Form, Field} from "formik";
 
-import {getActors} from "../actors/ActorServices";
+import {addActor, getActorById, editActor} from "./ActorService";
+import {MoviesCheckbox} from "../ui/MoviesCheckbox";
 
-const AddActor = ({actionType}) => {
-  if (actionType === "edit") {
-    getActors().then((res) => {
-      console.log(res);
-    });
-  }
-
-  const toast = useToast();
-  const [movieSelector, setMovieSelector] = useState([1]);
+const AddActor = (props) => {
+  const [initialValues, setInitialValues] = useState({
+    first_name: "",
+    last_name: "",
+    age: "",
+    gender: "",
+    image_link: "",
+    seeking_role: false,
+    movies: {movie_ids: []},
+  });
   const [selectedMovies, setSelectedMovies] = useState([]);
   const [seekingRole, setSeekingRole] = useState(false);
 
-  const renderMovieSelectors = () => {
-    const handleSelector = (e, index) => {
-      //delete prev selectors
-      let filteredSelectedMovies = selectedMovies.filter((i) => {
-        return i.selector !== index;
+  const toast = useToast();
+  const actorId = props.match.params.actorId;
+
+  useEffect(() => {
+    if (props.actionType === "edit") {
+      getActorById(actorId).then((res) => {
+        console.log(res);
+        let actorInitialValues = {
+          first_name: res.actor.first_name,
+          last_name: res.actor.last_name,
+          age: res.actor.age,
+          gender: res.actor.gender,
+          image_link: res.actor.image_link,
+          seeking_role: res.actor.seeking_role,
+          movies: {movie_ids: res.actor.movies.map((movie) => movie.id)},
+        };
+        setSeekingRole(res.actor.seeking_role);
+        setSelectedMovies(res.actor.movies.map((movie) => movie.id));
+        setInitialValues(actorInitialValues);
       });
-      if (e === "cancel") {
-        setSelectedMovies(filteredSelectedMovies);
-        let filteredMovieSelector = movieSelector.filter((i) => {
-          return i !== index;
-        });
-
-        setMovieSelector(filteredMovieSelector);
-        return;
-      }
-      let newMovies = [
-        ...filteredSelectedMovies,
-        {selector: index, movie_id: Number(e.target.value)},
-      ];
-
-      setSelectedMovies(newMovies);
-    };
-
-    return movieSelector.map((index) => {
-      return (
-        <HStack spacing="8px" mt="10px">
-          <MovieSelect
-            key={index}
-            id="moviesSelector"
-            onChange={(e) => handleSelector(e, index)}
-          ></MovieSelect>
-          <IconButton
-            mt="10px"
-            icon={<CloseIcon w="9px" />}
-            onClick={() => handleSelector("cancel", index)}
-          />
-        </HStack>
-      );
-    });
-  };
-
-  const addMovieSelector = () => {
-    let movieSelectors = [...movieSelector, movieSelector.length + 1];
-    setMovieSelector(movieSelectors);
-  };
-
-  console.log(selectedMovies);
-  console.log(movieSelector);
+    }
+  }, []);
 
   const validate = (values) => {
-    values.seeking_role = Boolean(seekingRole);
-    console.log(values.seeking_role);
     const errors = {};
     if (!values.first_name) {
       errors.first_name = "Required";
@@ -99,7 +69,7 @@ const AddActor = ({actionType}) => {
 
     if (!values.age) {
       errors.age = "Required";
-    } else if (isNaN(values.age)) {
+    } else if (isNaN(values.age) || values.age > 100) {
       errors.age = "Not a valid age value";
     }
 
@@ -107,6 +77,14 @@ const AddActor = ({actionType}) => {
       errors.gender = "Required";
     }
 
+    if (values.image_link) {
+      try {
+        new URL(values.image_link);
+      } catch (e) {
+        errors.image_link = "Invalid image url";
+      }
+    }
+    values.seeking_role = seekingRole;
     if (!values.seeking_role) {
       errors.seeking_role = "Required";
     }
@@ -114,66 +92,72 @@ const AddActor = ({actionType}) => {
     return errors;
   };
 
+  const checkMovies = (e) => {
+    let newSelectedMovies = e.map((i) => Number(i));
+    setSelectedMovies(newSelectedMovies);
+  };
+
   return (
-    <Container maxW="xl" centerContent>
-      <Box px="10" pt="10">
-        <Text textStyle="title">Enroll a new actor</Text>
+    <Container maxW="xl" py="10" centerContent>
+      <Box px="10" pt="5">
+        <Text textStyle="title">
+          {props.actionType === "edit" ? "Edit actor" : "Enroll a new actor"}
+        </Text>
       </Box>
 
       <Formik
-        initialValues={{
-          first_name: "",
-          last_name: "",
-          age: "",
-          gender: "",
-          image_link: "",
-          seeking_role: "",
-          movies: {movie_ids: []},
-        }}
+        initialValues={initialValues}
+        enableReinitialize={true}
         validate={validate}
         onSubmit={(values, actions) => {
+          values.age = Number(values.age);
           values.movies.movie_ids = selectedMovies;
-          console.log(values.movies);
-          /* axios
-            .post(`${api}/actors`, {
-              first_name: values.first_name,
-              last_name: values.last_name,
-              age: values.age,
-              gender: values.gender,
-              image_link: values.image_link,
-              seeking_role: true,
-              movies: {
-                movie_ids: [1],
-              },
-            })
-            .then((res) => {
-              console.log(res);
-              actions.setSubmitting(false);
-              toast({
-                title: "Enroll actor",
-                description: "Movie added correctly.",
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-              });
-            })
-            .catch((err) => {
-              console.error(err);
-              toast({
-                title: "Error",
-                description: "err",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-              });
-              actions.setSubmitting(false);
-            }); */
-
-          setTimeout(() => {
-            console.log(values.seeking_role);
-            alert(JSON.stringify(values, null, 2));
-            actions.setSubmitting(false);
-          }, 1000);
+          values.seeking_role = seekingRole === "true" ? true : false;
+          if (props.actionType === "edit") {
+            editActor(values, actorId).then((res) => {
+              if (res.success) {
+                actions.setSubmitting(false);
+                toast({
+                  title: "Edit actor",
+                  description: "Actor information updated successfully.",
+                  status: "success",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              } else {
+                actions.setSubmitting(false);
+                toast({
+                  title: "Error",
+                  description: "An error has occured!",
+                  status: "error",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              }
+            });
+          } else {
+            addActor(values).then((res) => {
+              if (res.success) {
+                actions.setSubmitting(false);
+                toast({
+                  title: "Enroll actor",
+                  description: "Actor added correctly.",
+                  status: "success",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              } else {
+                actions.setSubmitting(false);
+                toast({
+                  title: "Error",
+                  description: "An error has occured!",
+                  status: "error",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              }
+            });
+          }
         }}
       >
         {(props) => (
@@ -197,7 +181,7 @@ const AddActor = ({actionType}) => {
                       {...field}
                       id="first_name"
                       variant="filled"
-                      placeholder="first_name"
+                      placeholder="First name"
                     />
                     <FormErrorMessage>
                       {form.errors.first_name}
@@ -216,7 +200,7 @@ const AddActor = ({actionType}) => {
                       {...field}
                       id="last_name"
                       variant="filled"
-                      placeholder="last_name"
+                      placeholder="Last name"
                     />
                     <FormErrorMessage>{form.errors.last_name}</FormErrorMessage>
                   </FormControl>
@@ -260,25 +244,41 @@ const AddActor = ({actionType}) => {
               </Field>
 
               <Field name="image_link">
-                {({field}) => (
-                  <FormControl>
+                {({field, form}) => (
+                  <FormControl
+                    isInvalid={
+                      form.errors.image_link && form.touched.image_link
+                    }
+                  >
                     <FormLabel htmlFor="image_link">Profile image</FormLabel>
                     <Input
                       {...field}
                       id="image_link"
                       variant="filled"
-                      placeholder="image_link"
+                      placeholder="https://"
                     />
+                    <FormErrorMessage>
+                      {form.errors.image_link}
+                    </FormErrorMessage>
                   </FormControl>
                 )}
               </Field>
 
               <Field name="seeking_role">
-                {({form}) => (
-                  <FormControl isInvalid={form.errors.seeking_role} isRequired>
+                {({field, form}) => (
+                  <FormControl
+                    isInvalid={
+                      form.errors.seeking_role && form.touched.seeking_role
+                    }
+                    isRequired
+                  >
                     <FormLabel htmlFor="seeking_role">Seeking roles</FormLabel>
 
-                    <RadioGroup onChange={setSeekingRole} value={seekingRole}>
+                    <RadioGroup
+                      {...field}
+                      onChange={setSeekingRole}
+                      value={seekingRole}
+                    >
                       <Stack direction="row" spacing={5}>
                         <Radio colorScheme="green" value="true">
                           Yes
@@ -296,25 +296,25 @@ const AddActor = ({actionType}) => {
               </Field>
 
               <FormControl>
-                <FormLabel htmlFor="image_link">Movies: </FormLabel>
-                {renderMovieSelectors()}
+                <FormLabel htmlFor="movies">Movies: </FormLabel>
+                <MoviesCheckbox
+                  value={selectedMovies}
+                  onChange={(e) => {
+                    checkMovies(e);
+                  }}
+                ></MoviesCheckbox>
               </FormControl>
-              <Button
-                colorScheme="teal"
-                variant="outline"
-                onClick={addMovieSelector}
-              >
-                Add movies
-              </Button>
             </VStack>
-            <Button
-              mt={4}
-              colorScheme="teal"
-              isLoading={props.isSubmitting}
-              type="submit"
-            >
-              Submit
-            </Button>
+            <Center>
+              <Button
+                mt={8}
+                colorScheme="teal"
+                isLoading={props.isSubmitting}
+                type="submit"
+              >
+                Submit
+              </Button>
+            </Center>
           </Form>
         )}
       </Formik>
