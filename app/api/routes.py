@@ -7,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from app.models import Actor, Movie, ActorsInMovies
 from . import api
+from ..auth.auth import requires_auth, AuthError
 
 
 @api.after_request
@@ -86,6 +87,7 @@ def get_actor_by_id(actor_id):
 
 
 @api.route("/actors", methods=["POST"])
+@requires_auth('add:actor')
 def add_actor():
     body = request.get_json()
 
@@ -119,6 +121,7 @@ def add_actor():
 
 
 @api.route("/actors/<int:actor_id>", methods=["PATCH"])
+@requires_auth('update:actor')
 def edit_actor(actor_id):
     body = request.get_json()
     try:
@@ -144,6 +147,7 @@ def edit_actor(actor_id):
 
 
 @api.route("/actors/<int:actor_id>", methods=["DELETE"])
+@requires_auth('delete:actor')
 def delete_actor(actor_id):
 
     try:
@@ -234,6 +238,7 @@ def get_movie_by_id(movie_id):
 
 
 @api.route("/movies", methods=["POST"])
+@requires_auth('add:movie')
 def add_movie():
     body = request.get_json()
     try:
@@ -262,6 +267,7 @@ def add_movie():
 
 
 @api.route("/movies/<int:movie_id>", methods=["PATCH"])
+@requires_auth('update:movie')
 def edit_movie(movie_id):
     body = request.get_json()
     try:
@@ -286,6 +292,7 @@ def edit_movie(movie_id):
 
 
 @api.route("/movies/<int:movie_id>", methods=["DELETE"])
+@requires_auth('delete:movie')
 def delete_movie(movie_id):
 
     try:
@@ -346,3 +353,12 @@ def not_found(error):
         "error": 500,
         "message": "Internal Server Error"
     }), 500
+
+
+@api.errorhandler(AuthError)
+def authError(error):
+    return jsonify({
+        "success": False,
+        "error": error.status_code,
+        "message": error.error['description']
+    }), error.status_code
