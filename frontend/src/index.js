@@ -1,26 +1,24 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import Auth0ProviderWithHistory from "./auth/Auth0ProviderWithHistory";
 import {ChakraProvider} from "@chakra-ui/react";
-import {extendTheme} from "@chakra-ui/react";
+import customTheme from "./styles/theme";
 
-const colors = {
-  brand: {
-    900: "#1a365d",
-    800: "#153e75",
-    700: "#2a69ac",
-  },
-};
+//const history = useHistory();
 
-const theme = extendTheme({colors});
+/* const onRedirectCallback = (appState) => {
+  history.push(appState?.returnTo || window.location.pathname);
+}; */
 
 ReactDOM.render(
   <React.StrictMode>
-    <ChakraProvider theme={theme}>
-      <App />
-    </ChakraProvider>
+    <Auth0ProviderWithHistory>
+      <ChakraProvider theme={customTheme}>
+        <App />
+      </ChakraProvider>
+    </Auth0ProviderWithHistory>
   </React.StrictMode>,
   document.getElementById("root")
 );

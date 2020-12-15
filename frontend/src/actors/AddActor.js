@@ -19,7 +19,7 @@ import {
 import {Formik, Form, Field} from "formik";
 
 import {addActor, getActorById, editActor} from "./ActorService";
-import {MoviesCheckbox} from "../ui/MoviesCheckbox";
+import {CustomCheckbox} from "../ui/CustomCheckbox";
 
 const AddActor = (props) => {
   const [initialValues, setInitialValues] = useState({
@@ -297,12 +297,13 @@ const AddActor = (props) => {
 
               <FormControl>
                 <FormLabel htmlFor="movies">Movies: </FormLabel>
-                <MoviesCheckbox
+                <CustomCheckbox
+                  data="movies"
                   value={selectedMovies}
                   onChange={(e) => {
                     checkMovies(e);
                   }}
-                ></MoviesCheckbox>
+                ></CustomCheckbox>
               </FormControl>
             </VStack>
             <Center>

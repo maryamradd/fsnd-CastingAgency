@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import {AddIcon} from "@chakra-ui/icons";
 
-import {getActors} from "./ActorServices";
+import {getActors} from "./ActorService";
 
 const Actors = () => {
   const [actors, setActors] = useState([]);

@@ -1,5 +1,5 @@
 import {React, useState, useRef, useEffect} from "react";
-import {NavLink} from "react-router-dom";
+import {Link as ReactLink, NavLink} from "react-router-dom";
 import {
   Box,
   Flex,
@@ -23,7 +23,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
-import {getActorById, deleteActor} from "./ActorServices";
+import {getActorById, deleteActor} from "./ActorService";
 import {ImageFallback} from "../ui/ActorImageFallback";
 
 const ActorPage = (props) => {
@@ -110,7 +110,12 @@ const ActorPage = (props) => {
         <Text>Movies: </Text>
         {actorDetails.movies.map((movie) => {
           return (
-            <Link key={movie.id} textStyle="links" href={`/movies/${movie.id}`}>
+            <Link
+              as={ReactLink}
+              to={`/movies/${movie.id}`}
+              key={movie.id}
+              textStyle="links"
+            >
               {movie.title}
             </Link>
           );
