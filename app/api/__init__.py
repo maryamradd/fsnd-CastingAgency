@@ -1,10 +1,11 @@
 """Api Blueprints."""
 
+import os
 from flask import Blueprint, send_from_directory
 from flask_cors import CORS
 
 # client app blueprint to serve client's static files
-client_app = Blueprint("client_app", __name__, static_folder='../frontend/build', static_url_path='')
+client_app = Blueprint("client_app", __name__, static_folder=os.path.join(os.getcwd(), 'frontend/build'))
 CORS(client_app, resources={r"/*": {"origins": "*"}})
 
 # serve the react static files
