@@ -62,3 +62,47 @@ export const deleteMovie = (id) => {
       }
     });
 };
+
+export const addMovie = (body) => {
+  const apiURL = REACT_APP_API_URL + "/movies";
+  return axios(apiURL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    data: body,
+  })
+    .then((res) => res.data)
+    .catch((err) => {
+      if (err.response) {
+        return err.response.data;
+      } else if (err.request) {
+        // client never received a response, or request never left
+        //console.log(err.request);
+      } else {
+        // anything else
+      }
+    });
+};
+
+export const editMovie = (body, movieId) => {
+  const apiURL = REACT_APP_API_URL + "/movies/" + movieId;
+  return axios(apiURL, {
+    method: "PATCH",
+    headers: {
+      "content-type": "application/json",
+    },
+    data: body,
+  })
+    .then((res) => res.data)
+    .catch((err) => {
+      if (err.response) {
+        return err.response.data;
+      } else if (err.request) {
+        // client never received a response, or request never left
+        //console.log(err.request);
+      } else {
+        // anything else
+      }
+    });
+};

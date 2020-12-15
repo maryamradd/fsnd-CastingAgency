@@ -1,40 +1,60 @@
-import {React, useState} from "react";
-import axios from "axios";
+import {React, useState, useEffect} from "react";
 import {
-  Grid,
-  GridItem,
   Box,
-  SimpleGrid,
-  Flex,
-  Heading,
   Container,
-  Image,
   Text,
   Stack,
   VStack,
-  Link,
   Button,
-  PinInput,
-  PinInputField,
   Radio,
   RadioGroup,
-  Select,
   useToast,
-} from "@chakra-ui/react";
-import {
   FormControl,
   FormLabel,
   FormErrorMessage,
-  FormHelperText,
-  Checkbox,
   Input,
+  Center,
 } from "@chakra-ui/react";
-import {Formik, Form, Field, ErrorMessage} from "formik";
-import DatePicker from "../ui/DatePicker";
-const AddMovie = () => {
-  const [releaseDate, setReleaseDate] = useState(null);
-  const api = "http://127.0.0.1:5000/api";
+
+import {Formik, Form, Field} from "formik";
+import ReactDatePicker from "react-datepicker";
+import {addMovie, getMovieById, editMovie} from "./MoviesService";
+import {CustomCheckbox} from "../ui/CustomCheckbox";
+import "react-datepicker/dist/react-datepicker.css";
+
+const AddMovie = (props) => {
+  const [initialValues, setInitialValues] = useState({
+    title: "",
+    genre: "",
+    release_date: "",
+    poster: "",
+    seeking_talent: false,
+    actors: {actor_ids: []},
+  });
+  const [selectedActors, setSelectedActors] = useState([]);
+  const [seekingTalent, setSeekingTalent] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
   const toast = useToast();
+  const movieId = props.match.params.movieId;
+  console.log(selectedDate);
+  useEffect(() => {
+    if (props.actionType === "edit") {
+      getMovieById(movieId).then((res) => {
+        let movieInitialValues = {
+          title: res.movie.title,
+          genre: res.movie.genre,
+          release_date: res.movie.release_date,
+          poster: res.movie.poster,
+          seeking_talent: res.movie.seeking_talent,
+          actors: {actor_ids: res.movie.actors.map((actor) => actor.id)},
+        };
+        setSeekingTalent(res.movie.seeking_talent);
+        setSelectedActors(res.movie.actors.map((actor) => actor.id));
+        setInitialValues(movieInitialValues);
+      });
+    }
+  }, []);
 
   const validate = (values) => {
     const errors = {};
@@ -46,78 +66,87 @@ const AddMovie = () => {
       errors.genre = "Required";
     }
 
+    if (!values.release_date) {
+      errors.release_date = "Required";
+    }
+
     if (!values.poster) {
       errors.poster = "Required";
     }
 
-    /*  if (!values.release_date) {
-      errors.release_date = "Required";
-    } else if (values.release_date instanceof Date) {
-      errors.release_date = "Invalid Date";
-    } */
-
-    /* if (!values.seeking_talent) {
+    values.seeking_talent = seekingTalent;
+    if (!values.seeking_talent) {
       errors.seeking_talent = "Required";
-    } */
+    }
 
     return errors;
   };
 
+  const checkActors = (e) => {
+    let newSelectedActors = e.map((actorId) => Number(actorId));
+    setSelectedActors(newSelectedActors);
+  };
+
   return (
-    <Container maxW="xl" centerContent>
-      <Box px="10" pt="10">
-        <Text textStyle="title"> Add a new movie</Text>
+    <Container maxW="xl" py="10" centerContent>
+      <Box px="10" pt="5">
+        <Text textStyle="title">
+          {props.actionType === "edit" ? "Edit Movie" : "Add a new movie"}
+        </Text>
       </Box>
 
       <Formik
-        initialValues={{
-          title: "hyiukyhk",
-          genre: "",
-          poster: "",
-          release_date: releaseDate,
-        }}
+        initialValues={initialValues}
+        enableReinitialize={true}
         validate={validate}
         onSubmit={(values, actions) => {
-          values.release_date = releaseDate;
-
-          axios
-            .post(`${api}/movies`, {
-              title: values.title,
-              genre: values.genre,
-              poster: values.poster,
-              release_date: values.release_date,
-              seeking_talent: true,
-              actors: {
-                actor_ids: [1],
-              },
-            })
-            .then((res) => {
-              console.log(res);
-              actions.setSubmitting(false);
-              toast({
-                title: "Add Movie",
-                description: "Movie added correctly.",
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-              });
-            })
-            .catch((err) => {
-              console.error(err);
-              toast({
-                title: "Error",
-                description: "err",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-              });
-              actions.setSubmitting(false);
+          values.actors.actors_id = selectedActors;
+          values.seeking_talent = seekingTalent === "true" ? true : false;
+          if (props.actionType === "edit") {
+            editMovie(values, movieId).then((res) => {
+              if (res.success) {
+                actions.setSubmitting(false);
+                toast({
+                  title: "Edit movie",
+                  description: "Movie information updated successfully.",
+                  status: "success",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              } else {
+                actions.setSubmitting(false);
+                toast({
+                  title: "Error",
+                  description: "An error has occured!",
+                  status: "error",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              }
             });
-
-          /* setTimeout(() => {
-            alert(JSON.stringify(values, null, 2));
-            actions.setSubmitting(false);
-          }, 1000); */
+          } else {
+            addMovie(values).then((res) => {
+              if (res.success) {
+                actions.setSubmitting(false);
+                toast({
+                  title: "Add movie",
+                  description: "Movie added correctly.",
+                  status: "success",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              } else {
+                actions.setSubmitting(false);
+                toast({
+                  title: "Error",
+                  description: "An error has occured!",
+                  status: "error",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              }
+            });
+          }
         }}
       >
         {(props) => (
@@ -134,8 +163,13 @@ const AddMovie = () => {
                     isInvalid={form.errors.title && form.touched.title}
                     isRequired
                   >
-                    <FormLabel htmlFor="title">Movie title</FormLabel>
-                    <Input {...field} id="title" placeholder="title" />
+                    <FormLabel htmlFor="title">Movie Title</FormLabel>
+                    <Input
+                      {...field}
+                      id="title"
+                      variant="filled"
+                      placeholder="First name"
+                    />
                     <FormErrorMessage>{form.errors.title}</FormErrorMessage>
                   </FormControl>
                 )}
@@ -151,7 +185,7 @@ const AddMovie = () => {
                       {...field}
                       id="genre"
                       variant="filled"
-                      placeholder="genre"
+                      placeholder="Last name"
                     />
                     <FormErrorMessage>{form.errors.genre}</FormErrorMessage>
                   </FormControl>
@@ -169,7 +203,7 @@ const AddMovie = () => {
                       {...field}
                       id="poster"
                       variant="filled"
-                      placeholder="poster"
+                      placeholder="https://"
                     />
                     <FormErrorMessage>{form.errors.poster}</FormErrorMessage>
                   </FormControl>
@@ -178,19 +212,27 @@ const AddMovie = () => {
 
               <Field name="release_date">
                 {({field, form}) => (
-                  <FormControl isRequired>
+                  <FormControl
+                    isInvalid={
+                      form.errors.release_date && form.touched.release_date
+                    }
+                    isRequired
+                  >
                     <FormLabel htmlFor="release_date">Release Date</FormLabel>
 
-                    <DatePicker
-                      id="release_date"
-                      selected={releaseDate}
-                      onChange={(date) => setReleaseDate(date)}
-                    />
+                    <ReactDatePicker
+                      {...field}
+                      selected={selectedDate}
+                      onChange={(date) => setSelectedDate(date)}
+                    ></ReactDatePicker>
+                    <FormErrorMessage>
+                      {form.errors.release_date}
+                    </FormErrorMessage>
                   </FormControl>
                 )}
               </Field>
 
-              {/* <Field name="seeking_talent">
+              <Field name="seeking_talent">
                 {({field, form}) => (
                   <FormControl
                     isInvalid={
@@ -199,56 +241,51 @@ const AddMovie = () => {
                     isRequired
                   >
                     <FormLabel htmlFor="seeking_talent">
-                      Seeking Talent
+                      Seeking talent
                     </FormLabel>
 
-                    {/* <RadioGroup id="seeking_talent" defaultValue="2">
-                      <Stack spacing={5} direction="row">
-                        <Radio {...field} value="true">
+                    <RadioGroup
+                      {...field}
+                      onChange={setSeekingTalent}
+                      value={seekingTalent}
+                    >
+                      <Stack direction="row" spacing={5}>
+                        <Radio colorScheme="green" value="true">
                           Yes
                         </Radio>
-                        <Radio {...field} value="false">
+                        <Radio colorScheme="red" value="false">
                           No
                         </Radio>
                       </Stack>
-                    </RadioGroup> 
-
+                    </RadioGroup>
                     <FormErrorMessage>
                       {form.errors.seeking_talent}
                     </FormErrorMessage>
                   </FormControl>
                 )}
-              </Field> */}
+              </Field>
 
-              {/* <Field name="actors">
-                {({field, form}) => (
-                  <FormControl
-                    isInvalid={form.errors.actors && form.touched.actors}
-                    isRequired
-                  >
-                    <FormLabel htmlFor="actors">Seeking Talent</FormLabel>
-
-                    {/* <Select id="actors" placeholder="Select option">
-                      <option value="option1">Option 1</option>
-                      <option value="option2">Option 2</option>
-                      <option value="option3">Option 3</option>
-                    </Select>
-
-                    <Checkbox>Checkbox</Checkbox> 
-
-                    <FormErrorMessage>{form.errors.actors}</FormErrorMessage>
-                  </FormControl>
-                )}
-              </Field> */}
+              <FormControl>
+                <FormLabel htmlFor="movies">Actors: </FormLabel>
+                <CustomCheckbox
+                  data="actors"
+                  value={selectedActors}
+                  onChange={(e) => {
+                    checkActors(e);
+                  }}
+                ></CustomCheckbox>
+              </FormControl>
             </VStack>
-            <Button
-              mt={4}
-              colorScheme="teal"
-              isLoading={props.isSubmitting}
-              type="submit"
-            >
-              Submit
-            </Button>
+            <Center>
+              <Button
+                mt={8}
+                colorScheme="teal"
+                isLoading={props.isSubmitting}
+                type="submit"
+              >
+                Submit
+              </Button>
+            </Center>
           </Form>
         )}
       </Formik>

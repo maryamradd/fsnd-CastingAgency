@@ -41,15 +41,17 @@ const MovieCard = (props) => {
             {release_date.substring(7, 16)}
             <Text as="p" mt="200px" letterSpacing="2px">
               {actors.slice(0, 3).map((actor, i) => {
-                if (i === actors.length - 1) {
+                if (i === actors.length - 1 || i === 2) {
                   return (
                     <React.Fragment key={actor.id}>
+                      {" "}
                       {actor.last_name}
                     </React.Fragment>
                   );
                 } else {
                   return (
                     <React.Fragment key={actor.id}>
+                      {" "}
                       {actor.last_name} &bull;
                     </React.Fragment>
                   );

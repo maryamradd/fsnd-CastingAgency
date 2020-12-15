@@ -1,5 +1,5 @@
 import {React, useState, useRef, useEffect} from "react";
-import {NavLink} from "react-router-dom";
+import {Link as ReactLink, NavLink} from "react-router-dom";
 import {
   Box,
   Flex,
@@ -107,7 +107,12 @@ const MoviePage = (props) => {
         <Text>Actors: </Text>
         {movieDetails.actors.map((actor) => {
           return (
-            <Link key={actor.id} textStyle="links" href={`/actors/${actor.id}`}>
+            <Link
+              as={ReactLink}
+              to={`/actors/${actor.id}`}
+              key={actor.id}
+              textStyle="links"
+            >
               {actor.first_name} {actor.last_name}
             </Link>
           );
