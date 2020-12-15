@@ -15,7 +15,7 @@ class Config:
     FLASK_ENV = environ.get("FLASK_ENV")
 
     # Database
-    SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URI")
+    SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL")
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -24,4 +24,4 @@ class TestConfig(Config):
     """Testing configuration"""
 
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = environ.get("TEST_DATABASE_URI")
+    SQLALCHEMY_DATABASE_URI = environ.get("TEST_DATABASE_URL")
