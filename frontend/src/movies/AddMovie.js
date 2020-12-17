@@ -21,8 +21,10 @@ import ReactDatePicker from "react-datepicker";
 import {addMovie, getMovieById, editMovie} from "./MoviesService";
 import {CustomCheckbox} from "../ui/CustomCheckbox";
 import "react-datepicker/dist/react-datepicker.css";
+import {useAuth0} from "@auth0/auth0-react";
 
 const AddMovie = (props) => {
+  const {getAccessTokenSilently} = useAuth0();
   const [initialValues, setInitialValues] = useState({
     title: "",
     genre: "",
@@ -66,9 +68,9 @@ const AddMovie = (props) => {
       errors.genre = "Required";
     }
 
-    if (!values.release_date) {
+    /* if (!values.release_date) {
       errors.release_date = "Required";
-    }
+    } */
 
     if (!values.poster) {
       errors.poster = "Required";
@@ -87,6 +89,58 @@ const AddMovie = (props) => {
     setSelectedActors(newSelectedActors);
   };
 
+  const callAddMovie = async (values, actions) => {
+    const token = await getAccessTokenSilently();
+
+    const res = await addMovie(values, token);
+    console.log(token);
+    if (res.success) {
+      actions.setSubmitting(false);
+      toast({
+        title: "Add movie",
+        description: "Movie added correctly.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } else {
+      actions.setSubmitting(false);
+      toast({
+        title: "Error",
+        description: "An error has occured!",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const callEditMovie = async (values, actions) => {
+    const token = await getAccessTokenSilently();
+
+    const res = await editMovie(values, movieId, token);
+
+    if (res.success) {
+      actions.setSubmitting(false);
+      toast({
+        title: "Edit movie",
+        description: "Movie information updated successfully.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } else {
+      actions.setSubmitting(false);
+      toast({
+        title: "Error",
+        description: "An error has occured!",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <Container maxW="xl" py="10" centerContent>
       <Box px="10" pt="5">
@@ -103,49 +157,9 @@ const AddMovie = (props) => {
           values.actors.actors_id = selectedActors;
           values.seeking_talent = seekingTalent === "true" ? true : false;
           if (props.actionType === "edit") {
-            editMovie(values, movieId).then((res) => {
-              if (res.success) {
-                actions.setSubmitting(false);
-                toast({
-                  title: "Edit movie",
-                  description: "Movie information updated successfully.",
-                  status: "success",
-                  duration: 3000,
-                  isClosable: true,
-                });
-              } else {
-                actions.setSubmitting(false);
-                toast({
-                  title: "Error",
-                  description: "An error has occured!",
-                  status: "error",
-                  duration: 3000,
-                  isClosable: true,
-                });
-              }
-            });
+            callEditMovie(values, movieId, actions);
           } else {
-            addMovie(values).then((res) => {
-              if (res.success) {
-                actions.setSubmitting(false);
-                toast({
-                  title: "Add movie",
-                  description: "Movie added correctly.",
-                  status: "success",
-                  duration: 3000,
-                  isClosable: true,
-                });
-              } else {
-                actions.setSubmitting(false);
-                toast({
-                  title: "Error",
-                  description: "An error has occured!",
-                  status: "error",
-                  duration: 3000,
-                  isClosable: true,
-                });
-              }
-            });
+            callAddMovie(values, actions);
           }
         }}
       >

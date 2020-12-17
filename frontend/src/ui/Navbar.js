@@ -25,49 +25,15 @@ import {
 } from "@chakra-ui/react";
 export const Navbar = () => {
   const {colorMode, toggleColorMode} = useColorMode();
-  const [userMetadata, setUserMetadata] = useState(null);
-  //const isAuthenticated = false;
+
   const {
     loginWithRedirect,
     logout,
     user,
     isAuthenticated,
     isLoading,
-    getAccessTokenSilently,
   } = useAuth0();
-  const accessToken = getAccessTokenSilently();
-  console.log(accessToken);
 
-  useEffect(() => {
-    const getUserMetadata = async () => {
-      const {REACT_APP_AUTH0_DOMAIN} = process.env;
-
-      try {
-        const accessToken = await getAccessTokenSilently({
-          audience: `https://${REACT_APP_AUTH0_DOMAIN}/api/v2/`,
-          scope: "read:current_user",
-        });
-        console.log(accessToken);
-        const userDetailsByIdUrl = `https://${REACT_APP_AUTH0_DOMAIN}/api/v2/users/${user.sub}`;
-
-        const metadataResponse = await fetch(userDetailsByIdUrl, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-
-        const {user_metadata} = await metadataResponse.json();
-
-        setUserMetadata(user_metadata);
-      } catch (e) {
-        console.log(e.message);
-      }
-    };
-
-    getUserMetadata();
-  }, []);
-
-  console.log(userMetadata);
   return (
     <div>
       <Flex
@@ -77,13 +43,6 @@ export const Navbar = () => {
         borderBottom="1px"
         borderColor={useColorModeValue("gray.200", "gray.700")}
       >
-        <h1>
-          {userMetadata ? (
-            <pre>{JSON.stringify(userMetadata, null, 2)}</pre>
-          ) : (
-            "No user metadata defined"
-          )}
-        </h1>
         <Box px="4">
           <NavLink to="/">CA</NavLink>
         </Box>

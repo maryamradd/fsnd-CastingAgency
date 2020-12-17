@@ -8,7 +8,7 @@ from urllib.request import urlopen
 
 AUTH0_DOMAIN = environ.get('AUTH0_DOMAIN')
 ALGORITHMS = ['RS256']
-API_AUDIENCE = environ.get('API_AUDIENCE')
+API_AUDIENCE = environ.get('AUTH0_AUDIENCE')
 
 # AuthError Exception
 '''

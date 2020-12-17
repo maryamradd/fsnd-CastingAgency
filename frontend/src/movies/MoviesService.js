@@ -63,12 +63,14 @@ export const deleteMovie = (id) => {
     });
 };
 
-export const addMovie = (body) => {
+export const addMovie = (body, token) => {
   const apiURL = REACT_APP_API_URL + "/movies";
+
   return axios(apiURL, {
     method: "POST",
     headers: {
       "content-type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     data: body,
   })
@@ -85,12 +87,13 @@ export const addMovie = (body) => {
     });
 };
 
-export const editMovie = (body, movieId) => {
+export const editMovie = (body, movieId, token) => {
   const apiURL = REACT_APP_API_URL + "/movies/" + movieId;
   return axios(apiURL, {
     method: "PATCH",
     headers: {
       "content-type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     data: body,
   })
