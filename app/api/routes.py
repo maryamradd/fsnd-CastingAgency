@@ -88,7 +88,7 @@ def get_actor_by_id(actor_id):
 
 @api.route("/actors", methods=["POST"])
 @requires_auth('add:actor')
-def add_actor():
+def add_actor(jwt):
     body = request.get_json()
 
     try:
@@ -122,7 +122,7 @@ def add_actor():
 
 @api.route("/actors/<int:actor_id>", methods=["PATCH"])
 @requires_auth('update:actor')
-def edit_actor(actor_id):
+def edit_actor(jwt, actor_id):
     body = request.get_json()
     try:
         actor = Actor.query.get(actor_id)
@@ -148,7 +148,7 @@ def edit_actor(actor_id):
 
 @api.route("/actors/<int:actor_id>", methods=["DELETE"])
 @requires_auth('delete:actor')
-def delete_actor(actor_id):
+def delete_actor(jwt, actor_id):
 
     try:
         actor = Actor.query.get(actor_id)
@@ -239,7 +239,7 @@ def get_movie_by_id(movie_id):
 
 @api.route("/movies", methods=["POST"])
 @requires_auth('add:movie')
-def add_movie():
+def add_movie(jwt):
     body = request.get_json()
     try:
         title = body.get("title", None)
@@ -268,7 +268,7 @@ def add_movie():
 
 @api.route("/movies/<int:movie_id>", methods=["PATCH"])
 @requires_auth('update:movie')
-def edit_movie(movie_id):
+def edit_movie(jwt, movie_id):
     body = request.get_json()
     try:
         movie = Movie.query.get(movie_id)
@@ -293,7 +293,7 @@ def edit_movie(movie_id):
 
 @api.route("/movies/<int:movie_id>", methods=["DELETE"])
 @requires_auth('delete:movie')
-def delete_movie(movie_id):
+def delete_movie(jwt, movie_id):
 
     try:
         movie = Movie.query.get(movie_id)

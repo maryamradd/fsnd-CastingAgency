@@ -42,12 +42,13 @@ export const getMovieById = (id) => {
     });
 };
 
-export const deleteMovie = (id) => {
+export const deleteMovie = (id, token) => {
   const apiURL = REACT_APP_API_URL + "/movies/" + id;
   return axios(apiURL, {
     method: "DELETE",
     headers: {
       "content-type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
   })
     .then((res) => res.data)

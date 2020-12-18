@@ -12,8 +12,6 @@ import {
   Spacer,
   Center,
   Badge,
-} from "@chakra-ui/react";
-import {
   AlertDialog,
   AlertDialogBody,
   AlertDialogFooter,
@@ -23,6 +21,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
+import {useAuth0} from "@auth0/auth0-react";
 import {PosterFallback} from "../ui/MoviePosterFallback";
 import {getMovieById, deleteMovie} from "./MoviesService";
 
@@ -37,6 +36,8 @@ const MoviePage = (props) => {
     actors: [],
   });
   const [deleteIsOpen, setDeleteIsOpen] = useState(false);
+
+  const {getAccessTokenSilently} = useAuth0();
   const cancelRef = useRef();
   const toast = useToast();
   const movieId = props.match.params.movieId;
@@ -47,28 +48,30 @@ const MoviePage = (props) => {
     });
   }, []);
 
-  const deleteMovieConfirm = () => {
-    deleteMovie(movieId).then((res) => {
-      if (res.success) {
-        toast({
-          title: "Movie deleted",
-          description: "Selected movie deleted successfully",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-        setDeleteIsOpen(false);
-      } else {
-        toast({
-          title: "Error",
-          description: "An error has occured, Please try again later.",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    });
+  const deleteMovieConfirm = async () => {
+    const token = await getAccessTokenSilently();
+    const res = await deleteMovie(movieId, token);
+
+    if (res.success) {
+      toast({
+        title: "Movie deleted",
+        description: "Selected movie deleted successfully",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      setDeleteIsOpen(false);
+    } else {
+      toast({
+        title: "Error",
+        description: "An error has occured, Please try again later.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
+
   return (
     <Container maxW="xl" py="10" centerContent>
       <Box px="10" pt="10">

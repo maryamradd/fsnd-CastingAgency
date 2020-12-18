@@ -15,11 +15,10 @@ import {
   Input,
   Center,
 } from "@chakra-ui/react";
-
 import {Formik, Form, Field} from "formik";
-
-import {addActor, getActorById, editActor} from "./ActorService";
+import {useAuth0} from "@auth0/auth0-react";
 import {CustomCheckbox} from "../ui/CustomCheckbox";
+import {getActorById, addActor, editActor} from "./ActorService";
 
 const AddActor = (props) => {
   const [initialValues, setInitialValues] = useState({
@@ -34,6 +33,7 @@ const AddActor = (props) => {
   const [selectedMovies, setSelectedMovies] = useState([]);
   const [seekingRole, setSeekingRole] = useState(false);
 
+  const {getAccessTokenSilently} = useAuth0();
   const toast = useToast();
   const actorId = props.match.params.actorId;
 
@@ -97,6 +97,40 @@ const AddActor = (props) => {
     setSelectedMovies(newSelectedMovies);
   };
 
+  const callActorApi = async (values, actions, actionType) => {
+    const token = await getAccessTokenSilently();
+    var res;
+
+    if (actionType === "edit") {
+      res = await editActor(values, actorId, token);
+    } else {
+      res = await addActor(values, token);
+    }
+    console.log(token);
+    if (res.success) {
+      actions.setSubmitting(false);
+      toast({
+        title: actionType === "edit" ? "Edit actor" : "Add actor",
+        description:
+          actionType === "edit"
+            ? "Actor information updated successfully."
+            : "Actor added successfully.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } else {
+      actions.setSubmitting(false);
+      toast({
+        title: "Error",
+        description: "An error has occured!",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <Container maxW="xl" py="10" centerContent>
       <Box px="10" pt="5">
@@ -114,49 +148,9 @@ const AddActor = (props) => {
           values.movies.movie_ids = selectedMovies;
           values.seeking_role = seekingRole === "true" ? true : false;
           if (props.actionType === "edit") {
-            editActor(values, actorId).then((res) => {
-              if (res.success) {
-                actions.setSubmitting(false);
-                toast({
-                  title: "Edit actor",
-                  description: "Actor information updated successfully.",
-                  status: "success",
-                  duration: 3000,
-                  isClosable: true,
-                });
-              } else {
-                actions.setSubmitting(false);
-                toast({
-                  title: "Error",
-                  description: "An error has occured!",
-                  status: "error",
-                  duration: 3000,
-                  isClosable: true,
-                });
-              }
-            });
+            callActorApi(values, actions, "edit");
           } else {
-            addActor(values).then((res) => {
-              if (res.success) {
-                actions.setSubmitting(false);
-                toast({
-                  title: "Enroll actor",
-                  description: "Actor added correctly.",
-                  status: "success",
-                  duration: 3000,
-                  isClosable: true,
-                });
-              } else {
-                actions.setSubmitting(false);
-                toast({
-                  title: "Error",
-                  description: "An error has occured!",
-                  status: "error",
-                  duration: 3000,
-                  isClosable: true,
-                });
-              }
-            });
+            callActorApi(values, actions, "add");
           }
         }}
       >

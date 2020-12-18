@@ -12,8 +12,6 @@ import {
   Spacer,
   Center,
   Badge,
-} from "@chakra-ui/react";
-import {
   AlertDialog,
   AlertDialogBody,
   AlertDialogFooter,
@@ -23,6 +21,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
+import {useAuth0} from "@auth0/auth0-react";
 import {getActorById, deleteActor} from "./ActorService";
 import {ImageFallback} from "../ui/ActorImageFallback";
 
@@ -38,6 +37,8 @@ const ActorPage = (props) => {
     movies: [],
   });
   const [deleteIsOpen, setDeleteIsOpen] = useState(false);
+
+  const {getAccessTokenSilently} = useAuth0();
   const cancelRef = useRef();
   const toast = useToast();
   const actorId = props.match.params.actorId;
@@ -48,28 +49,30 @@ const ActorPage = (props) => {
     });
   }, []);
 
-  const deleteActorConfirm = () => {
-    deleteActor(actorId).then((res) => {
-      if (res.success) {
-        toast({
-          title: "Actor deleted",
-          description: "Selected actor deleted successfully",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-        setDeleteIsOpen(false);
-      } else {
-        toast({
-          title: "Error",
-          description: "An error has occured, Please try again later.",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    });
+  const deleteActorConfirm = async () => {
+    const token = await getAccessTokenSilently();
+    const res = await deleteActor(actorId, token);
+
+    if (res.success) {
+      toast({
+        title: "Actor deleted",
+        description: "Selected actor deleted successfully",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      setDeleteIsOpen(false);
+    } else {
+      toast({
+        title: "Error",
+        description: "An error has occured, Please try again later.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
+
   return (
     <Container maxW="xl" centerContent>
       <Box px="10" pt="10">

@@ -42,12 +42,13 @@ export const getActorById = (id) => {
     });
 };
 
-export const deleteActor = (id) => {
+export const deleteActor = (id, token) => {
   const apiURL = REACT_APP_API_URL + "/actors/" + id;
   return axios(apiURL, {
     method: "DELETE",
     headers: {
       "content-type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
   })
     .then((res) => res.data)
@@ -63,12 +64,13 @@ export const deleteActor = (id) => {
     });
 };
 
-export const addActor = (body) => {
+export const addActor = (body, token) => {
   const apiURL = REACT_APP_API_URL + "/actors";
   return axios(apiURL, {
     method: "POST",
     headers: {
       "content-type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     data: body,
   })
@@ -85,12 +87,13 @@ export const addActor = (body) => {
     });
 };
 
-export const editActor = (body, actorId) => {
+export const editActor = (body, actorId, token) => {
   const apiURL = REACT_APP_API_URL + "/actors/" + actorId;
   return axios(apiURL, {
     method: "PATCH",
     headers: {
       "content-type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     data: body,
   })

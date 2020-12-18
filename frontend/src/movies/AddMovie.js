@@ -17,14 +17,13 @@ import {
 } from "@chakra-ui/react";
 
 import {Formik, Form, Field} from "formik";
-import ReactDatePicker from "react-datepicker";
-import {addMovie, getMovieById, editMovie} from "./MoviesService";
-import {CustomCheckbox} from "../ui/CustomCheckbox";
-import "react-datepicker/dist/react-datepicker.css";
 import {useAuth0} from "@auth0/auth0-react";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import {CustomCheckbox} from "../ui/CustomCheckbox";
+import {getMovieById, addMovie, editMovie} from "./MoviesService";
 
 const AddMovie = (props) => {
-  const {getAccessTokenSilently} = useAuth0();
   const [initialValues, setInitialValues] = useState({
     title: "",
     genre: "",
@@ -37,9 +36,10 @@ const AddMovie = (props) => {
   const [seekingTalent, setSeekingTalent] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  const {getAccessTokenSilently} = useAuth0();
   const toast = useToast();
   const movieId = props.match.params.movieId;
-  console.log(selectedDate);
+
   useEffect(() => {
     if (props.actionType === "edit") {
       getMovieById(movieId).then((res) => {
@@ -68,12 +68,17 @@ const AddMovie = (props) => {
       errors.genre = "Required";
     }
 
-    /* if (!values.release_date) {
+    values.release_date = selectedDate;
+    if (!values.release_date) {
       errors.release_date = "Required";
-    } */
+    }
 
-    if (!values.poster) {
-      errors.poster = "Required";
+    if (values.poster) {
+      try {
+        new URL(values.poster);
+      } catch (e) {
+        errors.poster = "Invalid image url";
+      }
     }
 
     values.seeking_talent = seekingTalent;
@@ -89,42 +94,24 @@ const AddMovie = (props) => {
     setSelectedActors(newSelectedActors);
   };
 
-  const callAddMovie = async (values, actions) => {
+  const callMovieApi = async (values, actions, actionType) => {
     const token = await getAccessTokenSilently();
+    var res;
 
-    const res = await addMovie(values, token);
+    if (actionType === "edit") {
+      res = await editMovie(values, movieId, token);
+    } else {
+      res = await addMovie(values, token);
+    }
     console.log(token);
     if (res.success) {
       actions.setSubmitting(false);
       toast({
-        title: "Add movie",
-        description: "Movie added correctly.",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-    } else {
-      actions.setSubmitting(false);
-      toast({
-        title: "Error",
-        description: "An error has occured!",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
-  const callEditMovie = async (values, actions) => {
-    const token = await getAccessTokenSilently();
-
-    const res = await editMovie(values, movieId, token);
-
-    if (res.success) {
-      actions.setSubmitting(false);
-      toast({
-        title: "Edit movie",
-        description: "Movie information updated successfully.",
+        title: actionType === "edit" ? "Edit movie" : "Add movie",
+        description:
+          actionType === "edit"
+            ? "Movie information updated successfully."
+            : "Movie added successfully.",
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -157,9 +144,9 @@ const AddMovie = (props) => {
           values.actors.actors_id = selectedActors;
           values.seeking_talent = seekingTalent === "true" ? true : false;
           if (props.actionType === "edit") {
-            callEditMovie(values, movieId, actions);
+            callMovieApi(values, actions, "edit");
           } else {
-            callAddMovie(values, actions);
+            callMovieApi(values, actions, "add");
           }
         }}
       >
@@ -210,7 +197,6 @@ const AddMovie = (props) => {
                 {({field, form}) => (
                   <FormControl
                     isInvalid={form.errors.poster && form.touched.poster}
-                    isRequired
                   >
                     <FormLabel htmlFor="poster">Poster</FormLabel>
                     <Input
