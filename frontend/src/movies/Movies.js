@@ -10,14 +10,16 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-
 import {AddIcon} from "@chakra-ui/icons";
 import MovieCard from "./MovieCard";
+
+import {useAuth0} from "@auth0/auth0-react";
 import {getMovies} from "./MoviesService";
 
 const Movies = () => {
   const [movies, setMovies] = useState([]);
   const toast = useToast();
+  const {isAuthenticated} = useAuth0();
 
   useEffect(() => {
     getMovies()
@@ -38,7 +40,7 @@ const Movies = () => {
 
   return (
     <>
-      <Container maxW="xl">
+      <Container maxW="xl" position="relative" minH="calc(100vh - 81px)">
         <SimpleGrid columns={2} spacing={[52, 36]} pt="20">
           <Box>
             <Center h="80px">
@@ -47,11 +49,13 @@ const Movies = () => {
           </Box>
           <Box>
             <Center h="80px">
-              <NavLink to="/movies/add">
-                <Button colorScheme="teal" variant="solid">
-                  <AddIcon w={5} h={5} pr="2"></AddIcon> Add Movie
-                </Button>
-              </NavLink>
+              {isAuthenticated ? (
+                <NavLink to="/movies/add">
+                  <Button colorScheme="teal" variant="solid">
+                    <AddIcon w={5} h={5} pr="2"></AddIcon> Add Movie
+                  </Button>
+                </NavLink>
+              ) : null}
             </Center>
           </Box>
         </SimpleGrid>

@@ -1,7 +1,7 @@
 import React from "react";
 import {NavLink} from "react-router-dom";
 import {Box, Image, Container, Text, useColorModeValue} from "@chakra-ui/react";
-import {PosterFallback} from "../ui/MoviePosterFallback";
+import {ImageFallback} from "../ui/ImageFallback";
 
 const MovieCard = (props) => {
   const {id, title, poster, release_date, actors} = props.movie;
@@ -84,7 +84,7 @@ const MovieCard = (props) => {
             src={poster}
             alt="movie poster"
             objectFit="cover"
-            fallback={<PosterFallback />}
+            fallback={<ImageFallback />}
           />
         </NavLink>
       </Box>

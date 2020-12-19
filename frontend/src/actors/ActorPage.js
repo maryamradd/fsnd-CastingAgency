@@ -1,5 +1,5 @@
 import {React, useState, useRef, useEffect} from "react";
-import {Link as ReactLink, NavLink} from "react-router-dom";
+import {Link as ReactLink, NavLink, useHistory} from "react-router-dom";
 import {
   Box,
   Flex,
@@ -20,10 +20,10 @@ import {
   AlertDialogOverlay,
   useToast,
 } from "@chakra-ui/react";
+import {ImageFallback} from "../ui/ImageFallback";
 
 import {useAuth0} from "@auth0/auth0-react";
 import {getActorById, deleteActor} from "./ActorService";
-import {ImageFallback} from "../ui/ActorImageFallback";
 
 const ActorPage = (props) => {
   const [actorDetails, setActorDetails] = useState({
@@ -38,14 +38,19 @@ const ActorPage = (props) => {
   });
   const [deleteIsOpen, setDeleteIsOpen] = useState(false);
 
-  const {getAccessTokenSilently} = useAuth0();
+  const {getAccessTokenSilently, isAuthenticated, user} = useAuth0();
   const cancelRef = useRef();
   const toast = useToast();
+  const history = useHistory();
   const actorId = props.match.params.actorId;
 
   useEffect(() => {
     getActorById(actorId).then((res) => {
-      setActorDetails(res.actor);
+      if (res.success) {
+        setActorDetails(res.actor);
+      } else {
+        history.push("/404");
+      }
     });
   }, []);
 
@@ -74,7 +79,12 @@ const ActorPage = (props) => {
   };
 
   return (
-    <Container maxW="xl" centerContent>
+    <Container
+      maxW="xl"
+      position="relative"
+      minH="calc(100vh - 81px)"
+      centerContent
+    >
       <Box px="10" pt="10">
         <Text textStyle="title">
           {actorDetails.first_name} {actorDetails.last_name}
@@ -125,12 +135,20 @@ const ActorPage = (props) => {
         })}
       </Stack>
       <Flex p="2">
-        <NavLink to={`/actors/${actorId}/edit`}>
-          <Button mr="2">Edit</Button>
-        </NavLink>
-        <Button ml="2" bg="red.500" onClick={() => setDeleteIsOpen(true)}>
-          Delete
-        </Button>
+        {isAuthenticated &&
+        (user.roles_and_permissions.roles[0] === "Executive Producer" ||
+          user.roles_and_permissions.roles[0] === "Casting Director") ? (
+          <NavLink to={`/actors/${actorId}/edit`}>
+            <Button mr="2">Edit</Button>
+          </NavLink>
+        ) : null}
+
+        {isAuthenticated &&
+        user.roles_and_permissions.roles[0] === "Executive Producer" ? (
+          <Button ml="2" bg="red.500" onClick={() => setDeleteIsOpen(true)}>
+            Delete
+          </Button>
+        ) : null}
       </Flex>
       <AlertDialog
         isOpen={deleteIsOpen}

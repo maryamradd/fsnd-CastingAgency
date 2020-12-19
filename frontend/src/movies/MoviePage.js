@@ -1,5 +1,5 @@
 import {React, useState, useRef, useEffect} from "react";
-import {Link as ReactLink, NavLink} from "react-router-dom";
+import {Link as ReactLink, NavLink, useHistory} from "react-router-dom";
 import {
   Box,
   Flex,
@@ -20,9 +20,9 @@ import {
   AlertDialogOverlay,
   useToast,
 } from "@chakra-ui/react";
+import {ImageFallback} from "../ui/ImageFallback";
 
 import {useAuth0} from "@auth0/auth0-react";
-import {PosterFallback} from "../ui/MoviePosterFallback";
 import {getMovieById, deleteMovie} from "./MoviesService";
 
 const MoviePage = (props) => {
@@ -37,14 +37,19 @@ const MoviePage = (props) => {
   });
   const [deleteIsOpen, setDeleteIsOpen] = useState(false);
 
-  const {getAccessTokenSilently} = useAuth0();
+  const {getAccessTokenSilently, isAuthenticated, user} = useAuth0();
   const cancelRef = useRef();
   const toast = useToast();
+  const history = useHistory();
   const movieId = props.match.params.movieId;
 
   useEffect(() => {
     getMovieById(movieId).then((res) => {
-      setMovieDetails(res.movie);
+      if (res.success) {
+        setMovieDetails(res.movie);
+      } else {
+        history.push("/404");
+      }
     });
   }, []);
 
@@ -73,19 +78,24 @@ const MoviePage = (props) => {
   };
 
   return (
-    <Container maxW="xl" py="10" centerContent>
+    <Container
+      maxW="xl"
+      position="relative"
+      minH="calc(100vh - 81px)"
+      centerContent
+    >
       <Box px="10" pt="10">
         <Text textStyle="title">{movieDetails.title}</Text>
       </Box>
       <Stack px="10" py="5" textStyle="info">
         <Center>
-          <Box h="450px" overflow="hidden" boxShadow="lg">
+          <Box h="450px" minW="250px" overflow="hidden" boxShadow="lg">
             <Image
               maxW="xs"
               objectFit="cover"
               src={movieDetails.poster}
               alt="Movie poster"
-              fallback={<PosterFallback />}
+              fallback={<ImageFallback />}
             />
           </Box>
         </Center>
@@ -122,12 +132,20 @@ const MoviePage = (props) => {
         })}
       </Stack>
       <Flex p="2">
-        <NavLink to={`/movies/${movieId}/edit`}>
-          <Button mr="2">Edit</Button>
-        </NavLink>
-        <Button ml="2" bg="red.500" onClick={() => setDeleteIsOpen(true)}>
-          Delete
-        </Button>
+        {isAuthenticated &&
+        (user.roles_and_permissions.roles[0] === "Executive Producer" ||
+          user.roles_and_permissions.roles[0] === "Casting Director") ? (
+          <NavLink to={`/movies/${movieId}/edit`}>
+            <Button mr="2">Edit</Button>
+          </NavLink>
+        ) : null}
+
+        {isAuthenticated &&
+        user.roles_and_permissions.roles[0] === "Executive Producer" ? (
+          <Button ml="2" bg="red.500" onClick={() => setDeleteIsOpen(true)}>
+            Delete
+          </Button>
+        ) : null}
       </Flex>
       <AlertDialog
         isOpen={deleteIsOpen}

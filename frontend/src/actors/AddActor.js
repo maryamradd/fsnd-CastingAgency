@@ -1,4 +1,5 @@
 import {React, useState, useEffect} from "react";
+import {useHistory} from "react-router-dom";
 import {
   Box,
   Container,
@@ -35,24 +36,28 @@ const AddActor = (props) => {
 
   const {getAccessTokenSilently} = useAuth0();
   const toast = useToast();
+  const history = useHistory();
   const actorId = props.match.params.actorId;
 
   useEffect(() => {
     if (props.actionType === "edit") {
       getActorById(actorId).then((res) => {
-        console.log(res);
-        let actorInitialValues = {
-          first_name: res.actor.first_name,
-          last_name: res.actor.last_name,
-          age: res.actor.age,
-          gender: res.actor.gender,
-          image_link: res.actor.image_link,
-          seeking_role: res.actor.seeking_role,
-          movies: {movie_ids: res.actor.movies.map((movie) => movie.id)},
-        };
-        setSeekingRole(res.actor.seeking_role);
-        setSelectedMovies(res.actor.movies.map((movie) => movie.id));
-        setInitialValues(actorInitialValues);
+        if (res.success) {
+          let actorInitialValues = {
+            first_name: res.actor.first_name,
+            last_name: res.actor.last_name,
+            age: res.actor.age,
+            gender: res.actor.gender,
+            image_link: res.actor.image_link,
+            seeking_role: res.actor.seeking_role,
+            movies: {movie_ids: res.actor.movies.map((movie) => movie.id)},
+          };
+          setSeekingRole(res.actor.seeking_role);
+          setSelectedMovies(res.actor.movies.map((movie) => movie.id));
+          setInitialValues(actorInitialValues);
+        } else {
+          history.push("/404");
+        }
       });
     }
   }, []);
@@ -132,7 +137,13 @@ const AddActor = (props) => {
   };
 
   return (
-    <Container maxW="xl" py="10" centerContent>
+    <Container
+      maxW="xl"
+      position="relative"
+      minH="calc(100vh - 81px)"
+      py="20"
+      centerContent
+    >
       <Box px="10" pt="5">
         <Text textStyle="title">
           {props.actionType === "edit" ? "Edit actor" : "Enroll a new actor"}

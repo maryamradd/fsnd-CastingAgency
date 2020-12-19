@@ -1,4 +1,5 @@
 import {React, useState, useEffect} from "react";
+import {useHistory} from "react-router-dom";
 import {
   Box,
   Container,
@@ -38,22 +39,27 @@ const AddMovie = (props) => {
 
   const {getAccessTokenSilently} = useAuth0();
   const toast = useToast();
+  const history = useHistory();
   const movieId = props.match.params.movieId;
 
   useEffect(() => {
     if (props.actionType === "edit") {
       getMovieById(movieId).then((res) => {
-        let movieInitialValues = {
-          title: res.movie.title,
-          genre: res.movie.genre,
-          release_date: res.movie.release_date,
-          poster: res.movie.poster,
-          seeking_talent: res.movie.seeking_talent,
-          actors: {actor_ids: res.movie.actors.map((actor) => actor.id)},
-        };
-        setSeekingTalent(res.movie.seeking_talent);
-        setSelectedActors(res.movie.actors.map((actor) => actor.id));
-        setInitialValues(movieInitialValues);
+        if (res.success) {
+          let movieInitialValues = {
+            title: res.movie.title,
+            genre: res.movie.genre,
+            release_date: res.movie.release_date,
+            poster: res.movie.poster,
+            seeking_talent: res.movie.seeking_talent,
+            actors: {actor_ids: res.movie.actors.map((actor) => actor.id)},
+          };
+          setSeekingTalent(res.movie.seeking_talent);
+          setSelectedActors(res.movie.actors.map((actor) => actor.id));
+          setInitialValues(movieInitialValues);
+        } else {
+          history.push("/404");
+        }
       });
     }
   }, []);
@@ -129,7 +135,13 @@ const AddMovie = (props) => {
   };
 
   return (
-    <Container maxW="xl" py="10" centerContent>
+    <Container
+      maxW="xl"
+      position="relative"
+      minH="calc(100vh - 81px)"
+      py="20"
+      centerContent
+    >
       <Box px="10" pt="5">
         <Text textStyle="title">
           {props.actionType === "edit" ? "Edit Movie" : "Add a new movie"}
@@ -169,7 +181,7 @@ const AddMovie = (props) => {
                       {...field}
                       id="title"
                       variant="filled"
-                      placeholder="First name"
+                      placeholder="title"
                     />
                     <FormErrorMessage>{form.errors.title}</FormErrorMessage>
                   </FormControl>
@@ -186,7 +198,7 @@ const AddMovie = (props) => {
                       {...field}
                       id="genre"
                       variant="filled"
-                      placeholder="Last name"
+                      placeholder="genre"
                     />
                     <FormErrorMessage>{form.errors.genre}</FormErrorMessage>
                   </FormControl>

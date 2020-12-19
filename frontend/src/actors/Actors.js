@@ -13,11 +13,13 @@ import {
 } from "@chakra-ui/react";
 import {AddIcon} from "@chakra-ui/icons";
 
+import {useAuth0} from "@auth0/auth0-react";
 import {getActors} from "./ActorService";
 
 const Actors = () => {
   const [actors, setActors] = useState([]);
   const toast = useToast();
+  const {isAuthenticated} = useAuth0();
 
   useEffect(() => {
     getActors()
@@ -38,20 +40,22 @@ const Actors = () => {
 
   return (
     <>
-      <Container maxW="xl">
+      <Container maxW="xl" position="relative" minH="calc(100vh - 81px)">
         <SimpleGrid columns={2} spacing={[52, 36]} pt="20">
           <Box>
             <Center h="80px">
-              <Text textStyle="heading">Acotrs</Text>
+              <Text textStyle="heading">Actors</Text>
             </Center>
           </Box>
           <Box>
             <Center h="80px">
-              <NavLink to="/actors/add">
-                <Button colorScheme="teal" variant="solid">
-                  <AddIcon w={5} h={5} pr="2"></AddIcon> Add Actor
-                </Button>
-              </NavLink>
+              {isAuthenticated ? (
+                <NavLink to="/actors/add">
+                  <Button colorScheme="teal" variant="solid">
+                    <AddIcon w={5} h={5} pr="2"></AddIcon> Add Actor
+                  </Button>
+                </NavLink>
+              ) : null}
             </Center>
           </Box>
         </SimpleGrid>

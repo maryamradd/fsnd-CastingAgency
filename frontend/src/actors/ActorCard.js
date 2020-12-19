@@ -8,7 +8,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 
-import {ImageFallback} from "../ui/ActorImageFallback";
+import {ImageFallback} from "../ui/ImageFallback";
 
 const ActorCard = (props) => {
   const {
@@ -31,7 +31,7 @@ const ActorCard = (props) => {
           rounded="lg"
           borderRadius="sm"
           boxShadow="md"
-          bg={useColorModeValue("white", "gray.700")}
+          bg={useColorModeValue("gray.50", "gray.700")}
           _groupHover={{
             transform: "translateY( -3px ) scale( 1.02 ) ",
             boxShadow: "2xl",

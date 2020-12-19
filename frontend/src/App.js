@@ -1,14 +1,16 @@
 import React from "react";
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
+import PrivateRoute from "./auth/PrivateRoute";
 import Actors from "./actors/Actors";
-import {Navbar} from "./ui/Navbar";
-import {Home} from "./ui/Home";
+import Navbar from "./ui/Navbar";
+import Home from "./ui/Home";
 import ActorPage from "./actors/ActorPage";
 import Movies from "./movies/Movies";
 import MoviePage from "./movies/MoviePage";
 import AddMovie from "./movies/AddMovie";
 import AddActor from "./actors/AddActor";
 import NotFound from "./ui/NotFound";
+import Footer from "./ui/Footer";
 function App() {
   return (
     <>
@@ -17,23 +19,24 @@ function App() {
         <Switch>
           <Route exact path="/" component={Home} />
           <Route exact path="/movies" component={Movies} />
-          <Route exact path="/movies/add" component={AddMovie} />
+          <PrivateRoute exact path="/movies/add" component={AddMovie} />
           <Route exact path="/movies/:movieId" component={MoviePage} />
-          <Route
+          <PrivateRoute
             exact
             path="/movies/:movieId/edit"
             render={(props) => <AddMovie {...props} actionType="edit" />}
           />
           <Route exact path="/actors" component={Actors} />
-          <Route exact path="/actors/add" component={AddActor} />
+          <PrivateRoute exact path="/actors/add" component={AddActor} />
           <Route exact path="/actors/:actorId" component={ActorPage} />
-          <Route
+          <PrivateRoute
             exact
             path="/actors/:actorId/edit"
             render={(props) => <AddActor {...props} actionType="edit" />}
           />
-          <Route exact path="/404" component={NotFound} />
+          <Route component={NotFound} />
         </Switch>
+        <Footer />
       </Router>
     </>
   );

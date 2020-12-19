@@ -32,7 +32,7 @@ export const getActorById = (id) => {
     .then((res) => res.data)
     .catch((err) => {
       if (err.response) {
-        console.log(err.response);
+        return err.response.data;
       } else if (err.request) {
         // client never received a response, or request never left
         console.log(err.request);
