@@ -12,6 +12,11 @@ CORS(client_app, resources={r"/*": {"origins": "*"}})
 @client_app.route('/')
 def serve():
     return send_from_directory(client_app.template_folder, 'index.html')
+    
+# on any 404 return the index.html for client-side routing
+@client_app.errorhandler(404)
+def not_found(e):
+    return send_from_directory(client_app.template_folder, 'index.html')
 
 # api blueprint
 api = Blueprint("api", __name__)
