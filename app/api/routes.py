@@ -51,9 +51,9 @@ def get_actors():
 
 @api.route("/actors/<int:actor_id>", methods=["GET"])
 def get_actor_by_id(actor_id):
-    try:
-        actor = Actor.query.get(actor_id)
-    except:
+
+    actor = Actor.query.get(actor_id)
+    if actor is None:
         abort(404)
 
     movies_data = []
@@ -83,7 +83,7 @@ def get_actor_by_id(actor_id):
         return jsonify({"success": True, "actor": data})
 
     except:
-        abort(404)
+        abort(422)
 
 
 @api.route("/actors", methods=["POST"])
@@ -124,9 +124,9 @@ def add_actor(jwt):
 @requires_auth('update:actor')
 def edit_actor(jwt, actor_id):
     body = request.get_json()
-    try:
-        actor = Actor.query.get(actor_id)
-    except:
+
+    actor = Actor.query.get(actor_id)
+    if actor is None:
         abort(404)
     try:
         actor.first_name = body.get("first_name", None)
@@ -150,9 +150,8 @@ def edit_actor(jwt, actor_id):
 @requires_auth('delete:actor')
 def delete_actor(jwt, actor_id):
 
-    try:
-        actor = Actor.query.get(actor_id)
-    except:
+    actor = Actor.query.get(actor_id)
+    if actor is None:
         abort(404)
 
     try:
@@ -202,9 +201,9 @@ def get_movies():
 
 @api.route("/movies/<int:movie_id>", methods=["GET"])
 def get_movie_by_id(movie_id):
-    try:
-        movie = Movie.query.get(movie_id)
-    except:
+
+    movie = Movie.query.get(movie_id)
+    if movie is None:
         abort(404)
 
     actors_data = []
@@ -234,7 +233,7 @@ def get_movie_by_id(movie_id):
         return jsonify({"success": True, "movie": data})
 
     except:
-        abort(404)
+        abort(422)
 
 
 @api.route("/movies", methods=["POST"])
@@ -270,9 +269,9 @@ def add_movie(jwt):
 @requires_auth('update:movie')
 def edit_movie(jwt, movie_id):
     body = request.get_json()
-    try:
-        movie = Movie.query.get(movie_id)
-    except:
+
+    movie = Movie.query.get(movie_id)
+    if movie is None:
         abort(404)
     try:
         movie.title = body.get("title")
@@ -295,14 +294,34 @@ def edit_movie(jwt, movie_id):
 @requires_auth('delete:movie')
 def delete_movie(jwt, movie_id):
 
-    try:
-        movie = Movie.query.get(movie_id)
-    except:
+    movie = Movie.query.get(movie_id)
+    if movie is None:
         abort(404)
 
     try:
         movie.delete()
         return jsonify({"success": True})
+    except:
+        abort(500)
+
+
+# return user role based on permissions
+@api.route("/role")
+@requires_auth('add:actor')
+def get_user_role(jwt):
+
+    try:
+        permissions = jwt['permissions']
+        if set(['view:actors', 'view:movies']).issubset(permissions):
+            role = 'Casting Assistant'
+        elif set(['add:movie', 'delete:movie']).issubset(permissions):
+            role = 'Executive Producer'
+        else:
+            role = 'Casting Director'
+
+        return jsonify({"success": True,
+                        "role": role})
+
     except:
         abort(500)
 
