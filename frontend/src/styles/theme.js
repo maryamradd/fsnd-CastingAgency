@@ -13,7 +13,7 @@ const customTheme = extendTheme({
           bold: 700,
         },
       },
-      label: {color: mode("red.700", "green.900")(props)},
+      label: {color: mode("gray.700", "gray.500")(props)},
     }),
   },
   textStyles: {

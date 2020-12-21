@@ -13,11 +13,10 @@ export const getMovies = () => {
     .catch((err) => {
       if (err.response) {
         console.log(err.response);
-      } else if (err.request) {
+        return err.response.data;
+      } else {
         // client never received a response, or request never left
         console.log(err.request);
-      } else {
-        // anything else
       }
     });
 };
@@ -32,12 +31,10 @@ export const getMovieById = (id) => {
     .then((res) => res.data)
     .catch((err) => {
       if (err.response) {
+        console.log(err.response);
         return err.response.data;
-      } else if (err.request) {
-        // client never received a response, or request never left
-        console.log(err.request);
       } else {
-        // anything else
+        console.log(err.request);
       }
     });
 };
@@ -54,12 +51,10 @@ export const deleteMovie = (id, token) => {
     .then((res) => res.data)
     .catch((err) => {
       if (err.response) {
+        console.log(err.response);
         return err.response.data;
-      } else if (err.request) {
-        // client never received a response, or request never left
-        //console.log(err.request);
       } else {
-        // anything else
+        console.log(err.request);
       }
     });
 };
@@ -78,12 +73,10 @@ export const addMovie = (body, token) => {
     .then((res) => res.data)
     .catch((err) => {
       if (err.response) {
+        console.log(err.response);
         return err.response.data;
-      } else if (err.request) {
-        // client never received a response, or request never left
-        //console.log(err.request);
       } else {
-        // anything else
+        console.log(err.request);
       }
     });
 };
@@ -101,12 +94,10 @@ export const editMovie = (body, movieId, token) => {
     .then((res) => res.data)
     .catch((err) => {
       if (err.response) {
+        console.log(err.response);
         return err.response.data;
-      } else if (err.request) {
-        // client never received a response, or request never left
-        //console.log(err.request);
       } else {
-        // anything else
+        console.log(err.request);
       }
     });
 };
