@@ -1,4 +1,4 @@
-import React from "react";
+import {React, useContext} from "react";
 import {NavLink} from "react-router-dom";
 import {useAuth0} from "@auth0/auth0-react";
 import {
@@ -19,16 +19,12 @@ import {
 } from "@chakra-ui/react";
 import {SunIcon, MoonIcon} from "@chakra-ui/icons";
 
+import {AuthContext} from "../auth/AuthContext";
+
 const Navbar = () => {
   const {colorMode, toggleColorMode} = useColorMode();
-
-  const {
-    loginWithRedirect,
-    logout,
-    user,
-    isAuthenticated,
-    isLoading,
-  } = useAuth0();
+  const {isAuthenticated, user} = useContext(AuthContext);
+  const {loginWithRedirect, logout, isLoading} = useAuth0();
 
   return (
     <Flex
@@ -105,7 +101,7 @@ const Navbar = () => {
                 <PopoverContent>
                   <PopoverArrow />
 
-                  <PopoverBody w="xs">
+                  <PopoverBody>
                     <Button
                       colorScheme="teal"
                       onClick={() => logout({returnTo: window.location.origin})}

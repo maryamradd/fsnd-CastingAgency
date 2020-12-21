@@ -1,4 +1,4 @@
-import {React, useState, useEffect} from "react";
+import {React, useContext, useState, useEffect} from "react";
 import {useHistory} from "react-router-dom";
 import {
   Box,
@@ -16,12 +16,13 @@ import {
   Input,
   Center,
 } from "@chakra-ui/react";
-
-import {Formik, Form, Field} from "formik";
-import {useAuth0} from "@auth0/auth0-react";
+import {CustomCheckbox} from "../ui/CustomCheckbox";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import {CustomCheckbox} from "../ui/CustomCheckbox";
+import "../styles/date-picker.css";
+
+import {Formik, Form, Field} from "formik";
+import {AuthContext} from "../auth/AuthContext";
 import {getMovieById, addMovie, editMovie} from "./MoviesService";
 
 const AddMovie = (props) => {
@@ -37,13 +38,14 @@ const AddMovie = (props) => {
   const [seekingTalent, setSeekingTalent] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const {getAccessTokenSilently} = useAuth0();
+  const {token} = useContext(AuthContext);
   const toast = useToast();
   const history = useHistory();
   const movieId = props.match.params.movieId;
+  const actionType = props.match.url.includes("edit") ? "edit" : "add";
 
   useEffect(() => {
-    if (props.actionType === "edit") {
+    if (actionType === "edit") {
       getMovieById(movieId).then((res) => {
         if (res.success) {
           let movieInitialValues = {
@@ -101,7 +103,6 @@ const AddMovie = (props) => {
   };
 
   const callMovieApi = async (values, actions, actionType) => {
-    const token = await getAccessTokenSilently();
     var res;
 
     if (actionType === "edit") {
@@ -109,7 +110,6 @@ const AddMovie = (props) => {
     } else {
       res = await addMovie(values, token);
     }
-    console.log(token);
     if (res.success) {
       actions.setSubmitting(false);
       toast({
@@ -144,7 +144,7 @@ const AddMovie = (props) => {
     >
       <Box px="10" pt="5">
         <Text textStyle="title">
-          {props.actionType === "edit" ? "Edit Movie" : "Add a new movie"}
+          {actionType === "edit" ? "Edit Movie" : "Add a new movie"}
         </Text>
       </Box>
 
@@ -155,7 +155,7 @@ const AddMovie = (props) => {
         onSubmit={(values, actions) => {
           values.actors.actors_id = selectedActors;
           values.seeking_talent = seekingTalent === "true" ? true : false;
-          if (props.actionType === "edit") {
+          if (actionType === "edit") {
             callMovieApi(values, actions, "edit");
           } else {
             callMovieApi(values, actions, "add");

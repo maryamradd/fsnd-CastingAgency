@@ -1,4 +1,4 @@
-import {React, useState, useEffect} from "react";
+import {React, useContext, useState, useEffect} from "react";
 import {NavLink} from "react-router-dom";
 import ActorCard from "./ActorCard";
 import {
@@ -13,13 +13,13 @@ import {
 } from "@chakra-ui/react";
 import {AddIcon} from "@chakra-ui/icons";
 
-import {useAuth0} from "@auth0/auth0-react";
+import {AuthContext} from "../auth/AuthContext";
 import {getActors} from "./ActorService";
 
 const Actors = () => {
   const [actors, setActors] = useState([]);
   const toast = useToast();
-  const {isAuthenticated} = useAuth0();
+  const {isAuthenticated, userRole} = useContext(AuthContext);
 
   useEffect(() => {
     getActors()
@@ -49,7 +49,7 @@ const Actors = () => {
           </Box>
           <Box>
             <Center h="80px">
-              {isAuthenticated ? (
+              {isAuthenticated && userRole !== "Casting Assistant" ? (
                 <NavLink to="/actors/add">
                   <Button colorScheme="teal" variant="solid">
                     <AddIcon w={5} h={5} pr="2"></AddIcon> Add Actor

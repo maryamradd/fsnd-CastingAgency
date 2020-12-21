@@ -1,4 +1,4 @@
-import {React, useState, useRef, useEffect} from "react";
+import {React, useContext, useState, useRef, useEffect} from "react";
 import {Link as ReactLink, NavLink, useHistory} from "react-router-dom";
 import {
   Box,
@@ -22,7 +22,7 @@ import {
 } from "@chakra-ui/react";
 import {ImageFallback} from "../ui/ImageFallback";
 
-import {useAuth0} from "@auth0/auth0-react";
+import {AuthContext} from "../auth/AuthContext";
 import {getActorById, deleteActor} from "./ActorService";
 
 const ActorPage = (props) => {
@@ -38,7 +38,7 @@ const ActorPage = (props) => {
   });
   const [deleteIsOpen, setDeleteIsOpen] = useState(false);
 
-  const {getAccessTokenSilently, isAuthenticated, user} = useAuth0();
+  const {isAuthenticated, userRole, token} = useContext(AuthContext);
   const cancelRef = useRef();
   const toast = useToast();
   const history = useHistory();
@@ -55,7 +55,6 @@ const ActorPage = (props) => {
   }, []);
 
   const deleteActorConfirm = async () => {
-    const token = await getAccessTokenSilently();
     const res = await deleteActor(actorId, token);
 
     if (res.success) {
@@ -136,15 +135,14 @@ const ActorPage = (props) => {
       </Stack>
       <Flex p="2">
         {isAuthenticated &&
-        (user.roles_and_permissions.roles[0] === "Executive Producer" ||
-          user.roles_and_permissions.roles[0] === "Casting Director") ? (
+        (userRole === "Executive Producer" ||
+          userRole === "Casting Director") ? (
           <NavLink to={`/actors/${actorId}/edit`}>
             <Button mr="2">Edit</Button>
           </NavLink>
         ) : null}
 
-        {isAuthenticated &&
-        user.roles_and_permissions.roles[0] === "Executive Producer" ? (
+        {isAuthenticated && userRole === "Executive Producer" ? (
           <Button ml="2" bg="red.500" onClick={() => setDeleteIsOpen(true)}>
             Delete
           </Button>

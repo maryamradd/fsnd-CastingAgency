@@ -1,4 +1,4 @@
-import {React, useState, useEffect} from "react";
+import {React, useContext, useState, useEffect} from "react";
 import {NavLink} from "react-router-dom";
 import {
   Box,
@@ -13,13 +13,13 @@ import {
 import {AddIcon} from "@chakra-ui/icons";
 import MovieCard from "./MovieCard";
 
-import {useAuth0} from "@auth0/auth0-react";
+import {AuthContext} from "../auth/AuthContext";
 import {getMovies} from "./MoviesService";
 
 const Movies = () => {
   const [movies, setMovies] = useState([]);
   const toast = useToast();
-  const {isAuthenticated} = useAuth0();
+  const {isAuthenticated, userRole} = useContext(AuthContext);
 
   useEffect(() => {
     getMovies()
@@ -49,7 +49,7 @@ const Movies = () => {
           </Box>
           <Box>
             <Center h="80px">
-              {isAuthenticated ? (
+              {isAuthenticated && userRole === "Executive Producer" ? (
                 <NavLink to="/movies/add">
                   <Button colorScheme="teal" variant="solid">
                     <AddIcon w={5} h={5} pr="2"></AddIcon> Add Movie

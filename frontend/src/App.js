@@ -1,6 +1,7 @@
 import React from "react";
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 import PrivateRoute from "./auth/PrivateRoute";
+import AuthProvider from "./auth/AuthContext";
 import Actors from "./actors/Actors";
 import Navbar from "./ui/Navbar";
 import Home from "./ui/Home";
@@ -13,7 +14,7 @@ import NotFound from "./ui/NotFound";
 import Footer from "./ui/Footer";
 function App() {
   return (
-    <>
+    <AuthProvider>
       <Router>
         <Navbar />
         <Switch>
@@ -24,7 +25,7 @@ function App() {
           <PrivateRoute
             exact
             path="/movies/:movieId/edit"
-            render={(props) => <AddMovie {...props} actionType="edit" />}
+            component={AddMovie}
           />
           <Route exact path="/actors" component={Actors} />
           <PrivateRoute exact path="/actors/add" component={AddActor} />
@@ -32,13 +33,13 @@ function App() {
           <PrivateRoute
             exact
             path="/actors/:actorId/edit"
-            render={(props) => <AddActor {...props} actionType="edit" />}
+            component={AddActor}
           />
           <Route component={NotFound} />
         </Switch>
         <Footer />
       </Router>
-    </>
+    </AuthProvider>
   );
 }
 

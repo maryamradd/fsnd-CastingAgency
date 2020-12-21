@@ -1,4 +1,4 @@
-import {React, useState, useEffect} from "react";
+import {React, useContext, useState, useEffect} from "react";
 import {useHistory} from "react-router-dom";
 import {
   Box,
@@ -17,7 +17,7 @@ import {
   Center,
 } from "@chakra-ui/react";
 import {Formik, Form, Field} from "formik";
-import {useAuth0} from "@auth0/auth0-react";
+import {AuthContext} from "../auth/AuthContext";
 import {CustomCheckbox} from "../ui/CustomCheckbox";
 import {getActorById, addActor, editActor} from "./ActorService";
 
@@ -34,13 +34,14 @@ const AddActor = (props) => {
   const [selectedMovies, setSelectedMovies] = useState([]);
   const [seekingRole, setSeekingRole] = useState(false);
 
-  const {getAccessTokenSilently} = useAuth0();
+  const {token} = useContext(AuthContext);
   const toast = useToast();
   const history = useHistory();
   const actorId = props.match.params.actorId;
+  const actionType = props.match.url.includes("edit") ? "edit" : "add";
 
   useEffect(() => {
-    if (props.actionType === "edit") {
+    if (actionType === "edit") {
       getActorById(actorId).then((res) => {
         if (res.success) {
           let actorInitialValues = {
@@ -103,7 +104,6 @@ const AddActor = (props) => {
   };
 
   const callActorApi = async (values, actions, actionType) => {
-    const token = await getAccessTokenSilently();
     var res;
 
     if (actionType === "edit") {
@@ -111,7 +111,6 @@ const AddActor = (props) => {
     } else {
       res = await addActor(values, token);
     }
-    console.log(token);
     if (res.success) {
       actions.setSubmitting(false);
       toast({
@@ -146,7 +145,7 @@ const AddActor = (props) => {
     >
       <Box px="10" pt="5">
         <Text textStyle="title">
-          {props.actionType === "edit" ? "Edit actor" : "Enroll a new actor"}
+          {actionType === "edit" ? "Edit actor" : "Enroll a new actor"}
         </Text>
       </Box>
 
@@ -158,7 +157,7 @@ const AddActor = (props) => {
           values.age = Number(values.age);
           values.movies.movie_ids = selectedMovies;
           values.seeking_role = seekingRole === "true" ? true : false;
-          if (props.actionType === "edit") {
+          if (actionType === "edit") {
             callActorApi(values, actions, "edit");
           } else {
             callActorApi(values, actions, "add");
