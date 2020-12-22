@@ -115,7 +115,14 @@ const Navbar = () => {
           </Box>
         ) : (
           <Box px="4">
-            <Button colorScheme="teal" onClick={() => loginWithRedirect()}>
+            <Button
+              colorScheme="teal"
+              onClick={() =>
+                loginWithRedirect({
+                  appState: {targetUrl: window.location.pathname},
+                })
+              }
+            >
               Log in
             </Button>
           </Box>
