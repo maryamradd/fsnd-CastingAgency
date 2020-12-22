@@ -87,7 +87,7 @@ const MoviePage = (props) => {
       </Box>
       <Stack px="10" py="5" textStyle="info">
         <Center>
-          <Box h="450px" minW="250px" overflow="hidden" boxShadow="lg">
+          <Box w="320px" h="450px" overflow="hidden" boxShadow="lg">
             <Image
               w="320"
               h="450"

@@ -98,13 +98,14 @@ const AddMovie = (props) => {
   };
 
   const checkActors = (e) => {
-    let newSelectedActors = e.map((id) => Number(id));
+    let newSelectedActors = e.map((i) => Number(i));
     setSelectedActors(newSelectedActors);
+    console.log(newSelectedActors);
   };
 
   const callMovieApi = async (values, actions, actionType) => {
     var res;
-
+    console.log(values);
     if (actionType === "edit") {
       res = await editMovie(values, movieId, token);
     } else {
