@@ -89,8 +89,8 @@ const MoviePage = (props) => {
         <Center>
           <Box w="320px" h="450px" overflow="hidden" boxShadow="lg">
             <Image
-              w="320"
-              h="450"
+              w="320px"
+              h="450px"
               objectFit="cover"
               src={movieDetails.poster}
               alt="Movie poster"
