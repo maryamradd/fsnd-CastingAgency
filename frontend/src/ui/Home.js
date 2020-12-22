@@ -100,12 +100,16 @@ const Home = () => {
             </StatHelpText>
           </Stat>
         </Box>
-        {!isAuthenticated ? null : (
+        {isAuthenticated && userRole !== "Casting Assistant" ? (
           <>
             <AddButton action="Add actors" actionLink="/actors/add" />
+          </>
+        ) : null}
+        {isAuthenticated && userRole === "Executive Producer" ? (
+          <>
             <AddButton action="Add movies" actionLink="/movies/add" />
           </>
-        )}
+        ) : null}
       </SimpleGrid>
     </Container>
   );

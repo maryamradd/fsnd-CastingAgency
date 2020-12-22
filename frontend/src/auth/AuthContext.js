@@ -26,7 +26,7 @@ export default ({children}) => {
     };
 
     getUserRole();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, getAccessTokenSilently]);
 
   return (
     <AuthContext.Provider value={{isAuthenticated, token, user, userRole}}>
