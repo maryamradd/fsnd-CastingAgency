@@ -107,13 +107,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{API_URL}}/actors/1",
+							"raw": "{{API_URL}}/actors/14",
 							"host": [
 								"{{API_URL}}"
 							],
 							"path": [
 								"actors",
-								"1"
+								"14"
 							]
 						}
 					},
@@ -181,13 +181,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{API_URL}}/movies/1",
+							"raw": "{{API_URL}}/movies/9",
 							"host": [
 								"{{API_URL}}"
 							],
 							"path": [
 								"movies",
-								"1"
+								"9"
 							]
 						},
 						"description": "retrive movie by id"
@@ -525,6 +525,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"postman.setNextRequest(\"Add a new movie\");"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -610,7 +619,9 @@
 								"exec": [
 									"let date= Date.now();\r",
 									"let movie_title = 'UPDATED' + date;\r",
-									"pm.environment.set('MOVIE_TITLE', movie_title);"
+									"pm.environment.set('MOVIE_TITLE', movie_title);\r",
+									"\r",
+									"postman.setNextRequest(\"Delete movie by id\");"
 								],
 								"type": "text/javascript"
 							}
@@ -721,7 +732,10 @@
 								"exec": [
 									"let date= Date.now();\r",
 									"let movie_title = 'QA' + date;\r",
-									"pm.environment.set('MOVIE_TITLE', movie_title);"
+									"pm.environment.set('MOVIE_TITLE', movie_title);\r",
+									"\r",
+									"postman.setNextRequest(\"Update movie details\");\r",
+									""
 								],
 								"type": "text/javascript"
 							}
