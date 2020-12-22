@@ -131,7 +131,3 @@
   height: 20px;
   width: 20px;
 }
-
-.react-datepicker__close-icon::after:hover {
-  color: hsl(0, 0%, 70%);
-}

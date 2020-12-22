@@ -93,7 +93,8 @@ const ActorPage = (props) => {
         <Center>
           <Box boxSize="xs" overflow="hidden" boxShadow="lg">
             <Image
-              maxW="xs"
+              w="320"
+              h="320"
               objectFit="cover"
               src={actorDetails.image_link}
               alt="Actor image"

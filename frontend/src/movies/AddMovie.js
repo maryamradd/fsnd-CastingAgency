@@ -98,7 +98,7 @@ const AddMovie = (props) => {
   };
 
   const checkActors = (e) => {
-    let newSelectedActors = e.map((actorId) => Number(actorId));
+    let newSelectedActors = e.map((id) => Number(id));
     setSelectedActors(newSelectedActors);
   };
 
@@ -278,7 +278,7 @@ const AddMovie = (props) => {
               </Field>
 
               <FormControl>
-                <FormLabel htmlFor="movies">Actors: </FormLabel>
+                <FormLabel htmlFor="actors">Actors: </FormLabel>
                 <CustomCheckbox
                   data="actors"
                   value={selectedActors}
