@@ -40,18 +40,7 @@ $ flask run
 
 #### frontend
 
-move into the frontend directory and install project dependencies to run the app in development mode
-
-```sh
-$ npm install
-$ npm start
-```
-
-#### testing
-
-to test the api endpoints, download the collection `CastingAgency.postman_collection.json`
-then import it into [postman](https://www.postman.com/).
-update the TOKEN enviroment variable with a valid token if neccesary. run the tests using the collection runner.
+for running the fronend check [README.md](./frontend/README.md)
 
 ####
 
