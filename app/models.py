@@ -28,9 +28,11 @@ class Actor(db.Model):
     image_link = db.Column(db.String)
     seeking_role = db.Column(db.Boolean)
     movies = db.relationship(
-        "Movie",  back_populates="actors",  secondary=lambda: ActorsInMovies.__table__)
+        "Movie",  back_populates="actors",
+        secondary=lambda: ActorsInMovies.__table__)
 
-    def __init__(self, first_name, last_name, age, gender, image_link, seeking_role, movies):
+    def __init__(self, first_name, last_name, age, gender,
+                 image_link, seeking_role, movies):
         self.first_name = first_name
         self.last_name = last_name
         self.age = age
@@ -78,9 +80,11 @@ class Movie(db.Model):
     poster = db.Column(db.String)
     seeking_talent = db.Column(db.Boolean)
     actors = db.relationship(
-        "Actor", back_populates="movies",  secondary=lambda: ActorsInMovies.__table__)
+        "Actor", back_populates="movies",
+        secondary=lambda: ActorsInMovies.__table__)
 
-    def __init__(self, title, genre, release_date, poster, seeking_talent, actors):
+    def __init__(self, title, genre, release_date,
+                 poster, seeking_talent, actors):
         self.title = title
         self.genre = genre
         self.release_date = release_date

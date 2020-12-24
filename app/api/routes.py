@@ -4,7 +4,7 @@ import sys
 import re
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func
+from sqlalchemy import func, exc
 from app.models import Actor, Movie, ActorsInMovies
 from . import api
 from ..auth.auth import requires_auth, AuthError
@@ -45,7 +45,8 @@ def get_actors():
 
         return jsonify({"success": True, "actors": data})
 
-    except:
+    except exc.SQLAlchemyError as e:
+        print(str(e.__dict__['orig']))
         abort(422)
 
 
@@ -82,7 +83,8 @@ def get_actor_by_id(actor_id):
 
         return jsonify({"success": True, "actor": data})
 
-    except:
+    except exc.SQLAlchemyError as e:
+        print(str(e.__dict__['orig']))
         abort(422)
 
 
@@ -116,7 +118,8 @@ def add_actor(jwt):
 
         return jsonify({"success": True, "added_actor": actor.id})
 
-    except:
+    except exc.SQLAlchemyError as e:
+        print(str(e.__dict__['orig']))
         abort(422)
 
 
@@ -142,7 +145,9 @@ def edit_actor(jwt, actor_id):
 
         actor.update()
         return jsonify({"success": True, "updated_actor": actor.id})
-    except:
+
+    except exc.SQLAlchemyError as e:
+        print(str(e.__dict__['orig']))
         abort(422)
 
 
@@ -158,7 +163,8 @@ def delete_actor(jwt, actor_id):
         actor.delete()
         return jsonify({"success": True})
 
-    except:
+    except exc.SQLAlchemyError as e:
+        print(str(e.__dict__['orig']))
         abort(500)
 
 
@@ -195,7 +201,8 @@ def get_movies():
 
         return jsonify({"success": True, "movies": data})
 
-    except:
+    except exc.SQLAlchemyError as e:
+        print(str(e.__dict__['orig']))
         abort(422)
 
 
@@ -232,7 +239,8 @@ def get_movie_by_id(movie_id):
 
         return jsonify({"success": True, "movie": data})
 
-    except:
+    except exc.SQLAlchemyError as e:
+        print(str(e.__dict__['orig']))
         abort(422)
 
 
@@ -261,7 +269,9 @@ def add_movie(jwt):
 
         movie.insert()
         return jsonify({"success": True, "added_movie": movie.id})
-    except:
+
+    except exc.SQLAlchemyError as e:
+        print(str(e.__dict__['orig']))
         abort(422)
 
 
@@ -286,7 +296,9 @@ def edit_movie(jwt, movie_id):
 
         movie.update()
         return jsonify({"success": True, "updated_movie": movie.id})
-    except:
+
+    except exc.SQLAlchemyError as e:
+        print(str(e.__dict__['orig']))
         abort(422)
 
 
@@ -301,7 +313,9 @@ def delete_movie(jwt, movie_id):
     try:
         movie.delete()
         return jsonify({"success": True})
-    except:
+
+    except exc.SQLAlchemyError as e:
+        print(str(e.__dict__['orig']))
         abort(500)
 
 
@@ -322,7 +336,8 @@ def get_user_role(jwt):
         return jsonify({"success": True,
                         "role": role})
 
-    except:
+    except exc.SQLAlchemyError as e:
+        print(str(e.__dict__['orig']))
         abort(500)
 
 

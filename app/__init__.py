@@ -20,10 +20,8 @@ def create_app(config=None):
 
     with app.app_context():
         from .api import api, client_app
-        
         app.register_blueprint(client_app)
         app.register_blueprint(api, url_prefix="/api")
-        
         # db.create_all()  # Create database tables for our data models
 
     return app
