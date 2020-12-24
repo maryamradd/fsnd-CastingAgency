@@ -186,7 +186,6 @@ class CastingAgencyTestCase(unittest.TestCase):
             }
         )
         data = json.loads(response.data)
-        print(response.data)
         CastingAgencyTestCase.movie_id = data['added_movie']
 
         self.assertEqual(response.status_code, 200)
