@@ -2,7 +2,8 @@
 
 ### [Live Demo](https://cast1ng-agency.herokuapp.com)
 
-Udacity fullstack nanodegree project, The Casting Agency app models a company that is responsible for creating movies and managing and assigning actors to those movies.
+A project developed to make use of the knowledge acquired in the Udacity fullstack nanodegree.
+The Casting Agency app models a company that is responsible for creating movies and managing and assigning actors to those movies.
 The app has 3 types of users:
 
 - Casting Assistant

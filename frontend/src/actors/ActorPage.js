@@ -91,10 +91,10 @@ const ActorPage = (props) => {
       </Box>
       <Stack px="10" py="5" textStyle="info">
         <Center>
-          <Box w="320px" h="300px" overflow="hidden" boxShadow="lg">
+          <Box maxW="350px" maxH="350px" overflow="hidden" boxShadow="lg">
             <Image
-              w="320px"
-              h="300px"
+              w="350px"
+              h="350px"
               objectFit="cover"
               src={actorDetails.image_link}
               alt="Actor image"
